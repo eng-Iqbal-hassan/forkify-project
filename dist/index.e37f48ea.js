@@ -796,6 +796,34 @@ showRecipe();
  // The problem is that we do not have any id
  // the error because we are trying to find the recipe with empty array id
  ///////////////////////////////////////
+ // Lecture 8: The MVC Architecture
+ // Why worry about architecture?
+ // (1): Architecture provides us the structure.
+ // Software needs a structure, they way we organize our code.
+ // It basically means that how we organize, divide the code into different modules, classes and functions.
+ // (2): Maintainability: A project is never done. We need to be able to easily change it in the future
+ // (3): We need to add the new feature easily.
+ // The perfect architecture allows us all these three aspects.
+ // we can build our own architecture, but this thing is possible for only small projects but if the project grows then it is hard to maintain our own architecture.
+ // So, we will use the architecture which developers are using in the decades. like model view controller, model view presenter, flux and many other architectures.
+ // We can use framework like react, vue etc and then there is no need to take care of architecture on your own.
+ // Components of any architecture:
+ // There are 5 major components of an architecture.
+ // (1): Business Logics: Code that solves the actual business problem. Directly related toi what business does and what it needs. example, sending messages (whatsapp), storing transactions (Bank application) etc.
+ // (2): STATE: Essentially store all the data of the application. should be the 'single source of truth'. UI should be kept in sync with the state.
+ // (3): HTTP Library: Responsible for making and receiving AJAX calls. Optional but most always necessary in real world application
+ // (4): Application Logic (Router) : Code that is concerned about the implementation of application itself. Handle navigation and UI events.
+ // (5): Presentation Logic (UI Layer) : Code that is concerned about the visible part of the application.Essentially displays application state.
+ // Any of architecture model is good which covers all these 5 components.
+ // In this project we are going to use Model-view-controller architecture:
+ // It consists of three parts model, controller and view
+ // view is the user side and it contains Presentation logic
+ // model is the web side and it will contain Business Logic, STATE and HTTP Library.
+ // controller is the bridge between model and view and it contains the Application Logic.
+ // Model and view will kept in complete separate that they know nothing about each other which is the major goal of this model.
+ // Let say a click is made into the UI, this click is gone for controller because this thing is handled in the controller and from here model and view will face some changes.
+ //
+ ///////////////////////////////////////
 
 },{"url:../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime/runtime":"dXNgZ"}],"loVOp":[function(require,module,exports,__globalThis) {
 module.exports = require("9bcc84ee5d265e38").getBundleURL('hWUTQ') + "icons.dfd7a6db.svg" + "?" + Date.now();
