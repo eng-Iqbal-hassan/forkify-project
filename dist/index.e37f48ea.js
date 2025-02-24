@@ -647,10 +647,15 @@ const renderSpinner = function(parentEl) {
     parentEl.insertAdjacentHTML('afterbegin', markup);
 };
 const showRecipe = async function() {
+    const id = window.location.hash.slice(1);
+    console.log(id);
+    // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
+    if (!id) return; // guard clause
+    // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
     try {
         // 1: Loading the recipe:
         renderSpinner(recipeContainer);
-        const res = await fetch('https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886');
+        const res = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`);
         const data = await res.json();
         if (!res.ok) throw new error(`${data.message} ${res.status}`);
         // when this error does occur, this will move down in the catch block and it will shown in the alert window.
@@ -766,13 +771,30 @@ const showRecipe = async function() {
         alert(err);
     }
 };
-showRecipe(); // This fetch request will return a promise and this promise is awaited.
- ///////////////////////////////////////
- // Lecture 6: Rendering the Data
- // We have get the data from the fetch class, all the thing which we required is to get the UI which contains the data coming from fetch request.
- // in html, there is div(container) of class recipe in html which is the container for complete UI of a recipe coming in the screen.
- // point 2 and 3 in the showRecipe is from lecture 6
- // till this point, there are three problems (1): Message -> start by searching is still showing (2): Icons are missing and (3): the last one is that it is still to show the ingredients coming from API.
+showRecipe();
+// This fetch request will return a promise and this promise is awaited.
+///////////////////////////////////////
+// Lecture 6: Rendering the Data
+// We have get the data from the fetch class, all the thing which we required is to get the UI which contains the data coming from fetch request.
+// in html, there is div(container) of class recipe in html which is the container for complete UI of a recipe coming in the screen.
+// point 2 and 3 in the showRecipe is from lecture 6
+// till this point, there are three problems (1): Message -> start by searching is still showing (2): Icons are missing and (3): the last one is that it is still to show the ingredients coming from API.
+///////////////////////////////////////
+// Lecture 6: Listening for load and hashchange events
+// we have already done load recipe and render it. Now we need to perform these two steps when user select the specific recipe and on the page load with specific recipe id.
+// in URL, everything that comes after the hash is called hash.
+// for each recipe this hash does change and an other recipe shows on the screen.
+// Window.addEventListener('hashchange', showRecipe);
+// if we copy the url and paste on another browser then it does not show the recipe. This thing is resolved by using load event right after that
+// Window.addEventListener('load', showRecipe);
+// This is a kind od repeative code so this thing is resolved using this thing
+[
+    'hashchange',
+    'load'
+].forEach((ev)=>window.addEventListener(ev, showRecipe)); // so at first ev will be changed and on the second it will be loaded
+ // if there is no id then the spinner will keep loading and error will be thrown.
+ // The problem is that we do not have any id
+ // the error because we are trying to find the recipe with empty array id
  ///////////////////////////////////////
 
 },{"url:../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime/runtime":"dXNgZ"}],"loVOp":[function(require,module,exports,__globalThis) {
