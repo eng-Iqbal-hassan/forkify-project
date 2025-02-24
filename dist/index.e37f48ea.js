@@ -824,6 +824,8 @@ showRecipe();
  // Let say a click is made into the UI, this click is gone for controller because this thing is handled in the controller and from here model and view will face some changes.
  //
  ///////////////////////////////////////
+ // Lecture 9: Refactoring for MVC Architecture:
+ ///////////////////////////////////////
 
 },{"url:../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime/runtime":"dXNgZ"}],"loVOp":[function(require,module,exports,__globalThis) {
 module.exports = require("9bcc84ee5d265e38").getBundleURL('hWUTQ') + "icons.dfd7a6db.svg" + "?" + Date.now();
