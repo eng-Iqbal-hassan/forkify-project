@@ -1,3 +1,7 @@
+import * as model from './model.js';
+import RecipeView from './views/RecipeView.js';
+// now here in model the state and loadRecipe will be used as model.state and model.loadRecipe
+
 // Lecture 3: Overview and planning
 // planning of a project starts with user story.
 // user story is the description of application's functionality from user's perspective.
@@ -24,8 +28,8 @@
 // after that parcel is installed by the command npm i parcel@next -D
 //
 
-// import icons from '../img/icons.svg'; // Parcel 1
-import icons from 'url:../img/icons.svg'; // Parcel 2
+// // import icons from '../img/icons.svg'; // Parcel 1
+// import icons from 'url:../img/icons.svg'; // Parcel 2
 // import 'core-js/stable'; // this thing is for poly-filling everything else.
 import 'regenerator-runtime/runtime'; //This thing is for poly-filling async await
 
@@ -45,6 +49,7 @@ const timeout = function (s) {
 console.log('test');
 // our parcel is working and what we are writing in the script is achieving in the project
 
+/*
 const renderSpinner = function (parentEl) {
   const markup = `
     <div class="spinner">
@@ -56,17 +61,18 @@ const renderSpinner = function (parentEl) {
   parentEl.innerHTML = '';
   parentEl.insertAdjacentHTML('afterbegin', markup);
 };
+*/ // this code will also move in the view.
 
-const showRecipe = async function () {
-  const id = window.location.hash.slice(1);
-  console.log(id);
-  // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
-  if (!id) return; // guard clause
-  // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
-
+const controlRecipe = async function () {
   try {
+    const id = window.location.hash.slice(1);
+    console.log(id);
+    // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
+    if (!id) return; // guard clause
+    // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
     // 1: Loading the recipe:
-    renderSpinner(recipeContainer);
+    RecipeView.renderSpinner();
+    /*
     const res = await fetch(
       `https://forkify-api.herokuapp.com/api/v2/recipes/${id}`
     );
@@ -90,7 +96,17 @@ const showRecipe = async function () {
       cookingTime: recipe.cooking_time,
       ingredients: recipe.ingredients,
     };
+    */ // Now the data over here is coming from model so we are going import each and everything of model in the controller
+    // so the new thing will be like
+    // model.loadRecipe (id);
+    // as it is an async function so wwe should await it before next step
+    await model.loadRecipe(id); // This loadRecipe is not a pure function and it is not returning anything and just manipulating the state object and data is coming from state object so we have not stored it any variable. But now we can take the data from state object which will be rendered in the step below by the following way. model.state.recipe so this thing contains the data and it will be get by the destructuring in the following way
+    const { recipe } = model.state;
+    // ok the code regarding data is about model and it is being placed over there
+    // now rendering the data is the code for recipeView, so we have moved the code over there.
     // 2: Rendering recipe
+    RecipeView.render(model.state.recipe); // this is rendering the data coming from model on the object in view
+    /*
     const markup = `
         <figure class="recipe__fig">
           <img src="${recipe.image}" alt="${
@@ -191,11 +207,12 @@ const showRecipe = async function () {
         `;
     recipeContainer.innerHTML = '';
     recipeContainer.insertAdjacentHTML('afterbegin', markup);
+    */
   } catch (err) {
     alert(err);
   }
 };
-showRecipe();
+controlRecipe();
 // This fetch request will return a promise and this promise is awaited.
 
 ///////////////////////////////////////
@@ -208,7 +225,7 @@ showRecipe();
 
 ///////////////////////////////////////
 
-// Lecture 6: Listening for load and hashchange events
+// Lecture 7: Listening for load and hashchange events
 // we have already done load recipe and render it. Now we need to perform these two steps when user select the specific recipe and on the page load with specific recipe id.
 // in URL, everything that comes after the hash is called hash.
 // for each recipe this hash does change and an other recipe shows on the screen.
@@ -217,7 +234,9 @@ showRecipe();
 // if we copy the url and paste on another browser then it does not show the recipe. This thing is resolved by using load event right after that
 // Window.addEventListener('load', showRecipe);
 // This is a kind od repeative code so this thing is resolved using this thing
-['hashchange', 'load'].forEach(ev => window.addEventListener(ev, showRecipe));
+['hashchange', 'load'].forEach(ev =>
+  window.addEventListener(ev, controlRecipe)
+);
 // so at first ev will be changed and on the second it will be loaded
 // if there is no id then the spinner will keep loading and error will be thrown.
 // The problem is that we do not have any id
@@ -239,7 +258,7 @@ showRecipe();
 
 // Components of any architecture:
 // There are 5 major components of an architecture.
-// (1): Business Logics: Code that solves the actual business problem. Directly related toi what business does and what it needs. example, sending messages (whatsapp), storing transactions (Bank application) etc.
+// (1): Business Logics: Code that solves the actual business problem. Directly related to what business does and what it needs. example, sending messages (whatsapp), storing transactions (Bank application) etc.
 // (2): STATE: Essentially store all the data of the application. should be the 'single source of truth'. UI should be kept in sync with the state.
 // (3): HTTP Library: Responsible for making and receiving AJAX calls. Optional but most always necessary in real world application
 // (4): Application Logic (Router) : Code that is concerned about the implementation of application itself. Handle navigation and UI events.
@@ -259,5 +278,8 @@ showRecipe();
 ///////////////////////////////////////
 
 // Lecture 9: Refactoring for MVC Architecture:
+// ok here it is very clear that we have two major files. One is controller and other is model. controller is for navigation and model is for business logics, STATE and HTTP requests. And there is a folder for multiple views in which each file is for each view.
+// in model there is one big object which contains the functionality of recipe, search and bookmarks. we export this object into controller and then this thing controls the UI in views.
+// The reason for this lecture is to divide the whole code in multiple stuff. The code which is written already and the code which will come afterward will be in this pattern.
 
 ///////////////////////////////////////

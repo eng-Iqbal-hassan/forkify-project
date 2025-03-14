@@ -1,0 +1,33 @@
+import { async } from 'regenerator-runtime';
+
+export const state = {
+  recipe: {},
+};
+
+export const loadRecipe = async function (id) {
+  try {
+    const res = await fetch(
+      `https://forkify-api.herokuapp.com/api/v2/recipes/${id}`
+    );
+    const data = await res.json();
+    if (!res.ok) throw new error(`${data.message} ${res.status}`);
+    console.log(res, data);
+    const { recipe } = data.data;
+    console.log('recipe is', recipe);
+    state.recipe = {
+      id: recipe.id,
+      title: recipe.title,
+      publisher: recipe.publisher,
+      sourceUrl: recipe.source_url,
+      image: recipe.image_url,
+      servings: recipe.servings,
+      cookingTime: recipe.cooking_time,
+      ingredients: recipe.ingredients,
+    };
+  } catch (err) {
+    alert(err);
+  }
+};
+// loadRecipe is a function which is bringing the data of recipe from forkify APIs.
+// this function will not return anything but it will change our state object
+// This state is imported in the controller. As this state is changed over there. It will also be reflected in controller.js

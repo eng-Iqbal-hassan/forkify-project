@@ -8,7 +8,7 @@
     "start": "parcel index.html",
     "build": "parcel build index.html"
   },
-  "author": "iqbal hassan",
+  "author": "iqbalHassan",
   "license": "ISC",
   "devDependencies": {
     "@parcel/transformer-sass": "^2.13.3",
