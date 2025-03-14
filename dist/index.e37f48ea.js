@@ -856,6 +856,9 @@ controlRecipe();
  // ok here it is very clear that we have two major files. One is controller and other is model. controller is for navigation and model is for business logics, STATE and HTTP requests. And there is a folder for multiple views in which each file is for each view.
  // in model there is one big object which contains the functionality of recipe, search and bookmarks. we export this object into controller and then this thing controls the UI in views.
  // The reason for this lecture is to divide the whole code in multiple stuff. The code which is written already and the code which will come afterward will be in this pattern.
+ // summary: The thing is clear now how we breakdown our code into multiple files and then the chunks are performed in their respective files.
+ // Recipe view has his own code and data is nowhere in recipeView file. Also we have made the loadRecipe async function which makes the fetch request and get the data from API.
+ // Now this data is given to the recipe view in the controller( As both models and view are imported in the controller) and this data is given by the piece of code RecipeView.render(model.state.recipe) and here the data is replaced by the data coming from API. Happy😍
  ///////////////////////////////////////
 
 },{"regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model.js":"Y4A21","./views/RecipeView.js":"aFEMw"}],"dXNgZ":[function(require,module,exports,__globalThis) {
