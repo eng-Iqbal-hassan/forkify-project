@@ -30,8 +30,10 @@ export const loadRecipe = async function (id) {
   } catch (err) {
     // Temporary error
     console.error(`${err} 🔥🔥🔥🔥`);
+    throw err;
   }
 };
+// By this way we instead of just console the error we are showing the error in the UI which is the actual error handling.
 // loadRecipe is a function which is bringing the data of recipe from forkify APIs.
 // this function will not return anything but it will change our state object
 // This state is imported in the controller. As this state is changed over there. It will also be reflected in controller.js

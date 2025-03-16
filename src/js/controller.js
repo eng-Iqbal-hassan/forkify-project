@@ -211,7 +211,8 @@ const controlRecipe = async function () {
     recipeContainer.insertAdjacentHTML('afterbegin', markup);
     */
   } catch (err) {
-    alert(err);
+    // alert(err);
+    RecipeView.renderError();
   }
 };
 controlRecipe();
@@ -317,5 +318,12 @@ const init = function () {
 init();
 
 // By these two chunks of code we have perform the publisher-subscriber pattern.
+
+///////////////////////////////////////
+
+// Lecture 12: Implementing Error and Success Message.
+// When there is some error then it will be shown in the user interface.
+// Handling the error means displaying the error message in the view.
+// ok we have written the renderError code in the view and we are handling the error in the model but both these two things are connected in the controller so this thing is done in this controller.
 
 ///////////////////////////////////////

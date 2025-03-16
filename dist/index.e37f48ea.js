@@ -797,7 +797,8 @@ const controlRecipe = async function() {
     recipeContainer.innerHTML = '';
     recipeContainer.insertAdjacentHTML('afterbegin', markup);
     */ } catch (err) {
-        alert(err);
+        // alert(err);
+        (0, _recipeViewJsDefault.default).renderError();
     }
 };
 controlRecipe();
@@ -878,6 +879,11 @@ const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
 };
 init(); // By these two chunks of code we have perform the publisher-subscriber pattern.
+ ///////////////////////////////////////
+ // Lecture 12: Implementing Error and Success Message.
+ // When there is some error then it will be shown in the user interface.
+ // Handling the error means displaying the error message in the view.
+ // ok we have written the renderError code in the view and we are handling the error in the model but both these two things are connected in the controller so this thing is done in this controller.
  ///////////////////////////////////////
 
 },{"regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model.js":"Y4A21","./views/RecipeView.js":"aFEMw"}],"dXNgZ":[function(require,module,exports,__globalThis) {
@@ -1529,8 +1535,10 @@ const loadRecipe = async function(id) {
     } catch (err) {
         // Temporary error
         console.error(`${err} \u{1F525}\u{1F525}\u{1F525}\u{1F525}`);
+        throw err;
     }
-}; // loadRecipe is a function which is bringing the data of recipe from forkify APIs.
+}; // By this way we instead of just console the error we are showing the error in the UI which is the actual error handling.
+ // loadRecipe is a function which is bringing the data of recipe from forkify APIs.
  // this function will not return anything but it will change our state object
  // This state is imported in the controller. As this state is changed over there. It will also be reflected in controller.js
  // lecture 10 part -> this error is the consequence of the error which error occurs in the helper function
@@ -1592,6 +1600,8 @@ console.log((0, _fractional.Fraction));
 class RecipeView {
     #parentElement = document.querySelector('.recipe');
     #data;
+    #errorMessage = 'We could not find this recipe. Please try another one.';
+    #successMessage = '';
     render(data) {
         this.#data = data;
         const markup = this.#generateMarkup();
@@ -1601,7 +1611,7 @@ class RecipeView {
     #clear() {
         this.#parentElement.innerHTML = '';
     }
-    renderSpinner = function() {
+    renderSpinner() {
         const markup = `
       <div class="spinner">
         <svg>
@@ -1609,9 +1619,37 @@ class RecipeView {
         </svg>
       </div>
     `;
-        this.#parentElement.innerHTML = '';
+        this.#clear();
         this.#parentElement.insertAdjacentHTML('afterbegin', markup);
-    };
+    }
+    renderError(message = this.#errorMessage) {
+        const markup = `
+        <div class="error">
+            <div>
+              <svg>
+                <use href="${(0, _iconsSvgDefault.default)}#icon-alert-triangle"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+          </div>
+    `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML('afterbegin', markup);
+    }
+    renderMessage(message = this.#successMessage) {
+        const markup = `
+        <div class="message">
+            <div>
+              <svg>
+                <use href="${(0, _iconsSvgDefault.default)}#icon-smile"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+          </div>
+    `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML('afterbegin', markup);
+    }
     // Publisher code
     addHandlerRender(handler) {
         [
