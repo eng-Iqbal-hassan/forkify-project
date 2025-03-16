@@ -1,5 +1,6 @@
 import * as model from './model.js';
 import RecipeView from './views/RecipeView.js';
+import searchView from './views/searchView.js';
 // now here in model the state and loadRecipe will be used as model.state and model.loadRecipe
 
 // Lecture 3: Overview and planning
@@ -312,10 +313,10 @@ controlRecipe();
 
 // So, the solution is that we will now subscribe to the publisher by passing the subscribe. init function is in the controller. so the way is that as soon as the program loads init function is called which in turn immediately called the addHandlerRender function from the view. This thing is possible because the controller imports both view and the model. as we call the addHandleRender function in the init, we will pass the controlRecipe function as argument. So, essentially we will subscribe controlRecipes to addHandlerRender and in this way the two functions are really connected.
 
-const init = function () {
-  RecipeView.addHandlerRender(controlRecipe);
-};
-init();
+// const init = function () {
+//   RecipeView.addHandlerRender(controlRecipe);
+// };
+// init(); // its placement is set to the last
 
 // By these two chunks of code we have perform the publisher-subscriber pattern.
 
@@ -327,3 +328,36 @@ init();
 // ok we have written the renderError code in the view and we are handling the error in the model but both these two things are connected in the controller so this thing is done in this controller.
 
 ///////////////////////////////////////
+
+// Lecture 13,14: Implementing the Search Result:
+// ok the thing like loadRecipe and renderRecipe is done. In this lecture and in the next lecture the thing which we will do is that user searches, Load search result(async function call) and render search result and then bind it with user select recipe, load recipe and render recipe flow.
+// This thing is done by moving in the model and implement the search functionality where some API call is made.
+
+const controlSearchResults = async function () {
+  try {
+    // 1: Get Search Query
+    const query = searchView.getQuery();
+    if (!query) return;
+
+    // 2: Load Search Result
+    await model.loadSearchResults(query); // we are not storing it in the variable because it is not returning anything but it is manipulating the state.
+    // after using this query there will be no data at the start and then we need to make the event which will listen on the click of search button and on the click of that button we will call the function and not at the beginning when the script loads. And for this thing, we will again use the publisher subscriber pattern
+
+    // Render Search Result
+    console.log(model.state.search.results);
+  } catch (err) {
+    console.log(err);
+  }
+};
+controlSearchResults();
+
+// as this thing needs to happen in the search block by clicking the search button so we need to create its view, and this thing will be some other separate view which will not render anything but will provide us the set of input fields in the left side.
+// In first part of implementing search result, we have get the data and onclick of search button or hit enter we get the result of query and now we will implement the view.
+
+///////////////////////////////////////
+
+const init = function () {
+  RecipeView.addHandlerRender(controlRecipe);
+  searchView.addHandlerSearch(controlSearchResults);
+};
+init();
