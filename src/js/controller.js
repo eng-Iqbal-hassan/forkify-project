@@ -35,13 +35,15 @@ import 'regenerator-runtime/runtime'; //This thing is for poly-filling async awa
 
 const recipeContainer = document.querySelector('.recipe');
 
-const timeout = function (s) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`));
-    }, s * 1000);
-  });
-};
+// const timeout = function (s) {
+//   return new Promise(function (_, reject) {
+//     setTimeout(function () {
+//       reject(new Error(`Request took too long! Timeout after ${s} second`));
+//     }, s * 1000);
+//   });
+// };
+
+// This timeout function will move to the helper function
 
 // https://forkify-api.herokuapp.com/v2
 // For this time we are directly using the https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886 to get this specific id as the result in our interface
@@ -234,9 +236,9 @@ controlRecipe();
 // if we copy the url and paste on another browser then it does not show the recipe. This thing is resolved by using load event right after that
 // Window.addEventListener('load', showRecipe);
 // This is a kind od repeative code so this thing is resolved using this thing
-['hashchange', 'load'].forEach(ev =>
-  window.addEventListener(ev, controlRecipe)
-);
+// ['hashchange', 'load'].forEach(ev =>
+//   window.addEventListener(ev, controlRecipe)
+// );  // This code has been moved to the view as it is a publisher code.
 // so at first ev will be changed and on the second it will be loaded
 // if there is no id then the spinner will keep loading and error will be thrown.
 // The problem is that we do not have any id
@@ -285,5 +287,35 @@ controlRecipe();
 // summary: The thing is clear now how we breakdown our code into multiple files and then the chunks are performed in their respective files.
 // Recipe view has his own code and data is nowhere in recipeView file. Also we have made the loadRecipe async function which makes the fetch request and get the data from API.
 // Now this data is given to the recipe view in the controller( As both models and view are imported in the controller) and this data is given by the piece of code RecipeView.render(model.state.recipe) and here the data is replaced by the data coming from API. Happy😍
+
+///////////////////////////////////////
+
+// Lecture 11: Event Handler in MVC -> this thing is done by something called Publisher-subscriber pattern
+// hashchange is in the controller but everything related to DOM should be in view.
+// hashchange and load event together are not looking like they are in view but the event like click on the DOM appear that they are the part of view. same goes for hashchange and load event. They should appear in the view.
+// But the problem is that we want this function in the view but the function inside it is controlView which is the method of the controller. So how can we resolve it.
+
+// There are two important things to understand
+// (1): Events should be handled in the controller (otherwise we would have application logic in the view)
+// (2): Events should be listened for in the view (otherwise we would need DOM element in the controller)
+
+// Otherwise we would have DOM element in the controller and application logic in the view which would be wrong and against our MVC architecture.
+
+// we think that this thing is simple to handle that why should not call the controlRecipe function when the event occurs
+
+// But the thing is difficult is that we should not import controller in the view, because we set up the architecture like that the view should know nothing about the controller and it will work the other way around which is complex. The solution is called publisher-subscriber pattern. And design pattern in the programming are the standard solutions of specific kind of problem.
+
+// In this pattern, we have a publisher which have some code who knows when to react(like this is the event handler, a specific event occurs). And on the other hand there is subscriber which is the code which actually wants to react.(This is the code which will execute when the event fires)
+
+// And publisher does not even know that the subscriber does exist. because subscriber is in the controller and view does not have access of it. But now finally comes to the solution of the problem.
+
+// So, the solution is that we will now subscribe to the publisher by passing the subscribe. init function is in the controller. so the way is that as soon as the program loads init function is called which in turn immediately called the addHandlerRender function from the view. This thing is possible because the controller imports both view and the model. as we call the addHandleRender function in the init, we will pass the controlRecipe function as argument. So, essentially we will subscribe controlRecipes to addHandlerRender and in this way the two functions are really connected.
+
+const init = function () {
+  RecipeView.addHandlerRender(controlRecipe);
+};
+init();
+
+// By these two chunks of code we have perform the publisher-subscriber pattern.
 
 ///////////////////////////////////////

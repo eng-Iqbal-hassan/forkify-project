@@ -31,6 +31,11 @@ class RecipeView {
     this.#parentElement.insertAdjacentHTML('afterbegin', markup);
   }; // this is the public method which is called when we start fetching the data.
 
+  // Publisher code
+  addHandlerRender(handler) {
+    ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
+  }
+
   #generateMarkup() {
     return `
         <figure class="recipe__fig">

@@ -627,13 +627,14 @@ var _recipeViewJsDefault = parcelHelpers.interopDefault(_recipeViewJs);
 // import 'core-js/stable'; // this thing is for poly-filling everything else.
 var _runtime = require("regenerator-runtime/runtime"); //This thing is for poly-filling async await
 const recipeContainer = document.querySelector('.recipe');
-const timeout = function(s) {
-    return new Promise(function(_, reject) {
-        setTimeout(function() {
-            reject(new Error(`Request took too long! Timeout after ${s} second`));
-        }, s * 1000);
-    });
-};
+// const timeout = function (s) {
+//   return new Promise(function (_, reject) {
+//     setTimeout(function () {
+//       reject(new Error(`Request took too long! Timeout after ${s} second`));
+//     }, s * 1000);
+//   });
+// };
+// This timeout function will move to the helper function
 // https://forkify-api.herokuapp.com/v2
 // For this time we are directly using the https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886 to get this specific id as the result in our interface
 console.log('test');
@@ -816,49 +817,67 @@ controlRecipe();
 // if we copy the url and paste on another browser then it does not show the recipe. This thing is resolved by using load event right after that
 // Window.addEventListener('load', showRecipe);
 // This is a kind od repeative code so this thing is resolved using this thing
-[
-    'hashchange',
-    'load'
-].forEach((ev)=>window.addEventListener(ev, controlRecipe)); // so at first ev will be changed and on the second it will be loaded
- // if there is no id then the spinner will keep loading and error will be thrown.
- // The problem is that we do not have any id
- // the error because we are trying to find the recipe with empty array id
- ///////////////////////////////////////
- // Lecture 8: The MVC Architecture
- // Why worry about architecture?
- // (1): Architecture provides us the structure.
- // Software needs a structure, they way we organize our code.
- // It basically means that how we organize, divide the code into different modules, classes and functions.
- // (2): Maintainability: A project is never done. We need to be able to easily change it in the future
- // (3): We need to add the new feature easily.
- // The perfect architecture allows us all these three aspects.
- // we can build our own architecture, but this thing is possible for only small projects but if the project grows then it is hard to maintain our own architecture.
- // So, we will use the architecture which developers are using in the decades. like model view controller, model view presenter, flux and many other architectures.
- // We can use framework like react, vue etc and then there is no need to take care of architecture on your own.
- // Components of any architecture:
- // There are 5 major components of an architecture.
- // (1): Business Logics: Code that solves the actual business problem. Directly related to what business does and what it needs. example, sending messages (whatsapp), storing transactions (Bank application) etc.
- // (2): STATE: Essentially store all the data of the application. should be the 'single source of truth'. UI should be kept in sync with the state.
- // (3): HTTP Library: Responsible for making and receiving AJAX calls. Optional but most always necessary in real world application
- // (4): Application Logic (Router) : Code that is concerned about the implementation of application itself. Handle navigation and UI events.
- // (5): Presentation Logic (UI Layer) : Code that is concerned about the visible part of the application.Essentially displays application state.
- // Any of architecture model is good which covers all these 5 components.
- // In this project we are going to use Model-view-controller architecture:
- // It consists of three parts model, controller and view
- // view is the user side and it contains Presentation logic
- // model is the web side and it will contain Business Logic, STATE and HTTP Library.
- // controller is the bridge between model and view and it contains the Application Logic.
- // Model and view will kept in complete separate that they know nothing about each other which is the major goal of this model.
- // Let say a click is made into the UI, this click is gone for controller because this thing is handled in the controller and from here model and view will face some changes.
- //
- ///////////////////////////////////////
- // Lecture 9: Refactoring for MVC Architecture:
- // ok here it is very clear that we have two major files. One is controller and other is model. controller is for navigation and model is for business logics, STATE and HTTP requests. And there is a folder for multiple views in which each file is for each view.
- // in model there is one big object which contains the functionality of recipe, search and bookmarks. we export this object into controller and then this thing controls the UI in views.
- // The reason for this lecture is to divide the whole code in multiple stuff. The code which is written already and the code which will come afterward will be in this pattern.
- // summary: The thing is clear now how we breakdown our code into multiple files and then the chunks are performed in their respective files.
- // Recipe view has his own code and data is nowhere in recipeView file. Also we have made the loadRecipe async function which makes the fetch request and get the data from API.
- // Now this data is given to the recipe view in the controller( As both models and view are imported in the controller) and this data is given by the piece of code RecipeView.render(model.state.recipe) and here the data is replaced by the data coming from API. Happy😍
+// ['hashchange', 'load'].forEach(ev =>
+//   window.addEventListener(ev, controlRecipe)
+// );  // This code has been moved to the view as it is a publisher code.
+// so at first ev will be changed and on the second it will be loaded
+// if there is no id then the spinner will keep loading and error will be thrown.
+// The problem is that we do not have any id
+// the error because we are trying to find the recipe with empty array id
+///////////////////////////////////////
+// Lecture 8: The MVC Architecture
+// Why worry about architecture?
+// (1): Architecture provides us the structure.
+// Software needs a structure, they way we organize our code.
+// It basically means that how we organize, divide the code into different modules, classes and functions.
+// (2): Maintainability: A project is never done. We need to be able to easily change it in the future
+// (3): We need to add the new feature easily.
+// The perfect architecture allows us all these three aspects.
+// we can build our own architecture, but this thing is possible for only small projects but if the project grows then it is hard to maintain our own architecture.
+// So, we will use the architecture which developers are using in the decades. like model view controller, model view presenter, flux and many other architectures.
+// We can use framework like react, vue etc and then there is no need to take care of architecture on your own.
+// Components of any architecture:
+// There are 5 major components of an architecture.
+// (1): Business Logics: Code that solves the actual business problem. Directly related to what business does and what it needs. example, sending messages (whatsapp), storing transactions (Bank application) etc.
+// (2): STATE: Essentially store all the data of the application. should be the 'single source of truth'. UI should be kept in sync with the state.
+// (3): HTTP Library: Responsible for making and receiving AJAX calls. Optional but most always necessary in real world application
+// (4): Application Logic (Router) : Code that is concerned about the implementation of application itself. Handle navigation and UI events.
+// (5): Presentation Logic (UI Layer) : Code that is concerned about the visible part of the application.Essentially displays application state.
+// Any of architecture model is good which covers all these 5 components.
+// In this project we are going to use Model-view-controller architecture:
+// It consists of three parts model, controller and view
+// view is the user side and it contains Presentation logic
+// model is the web side and it will contain Business Logic, STATE and HTTP Library.
+// controller is the bridge between model and view and it contains the Application Logic.
+// Model and view will kept in complete separate that they know nothing about each other which is the major goal of this model.
+// Let say a click is made into the UI, this click is gone for controller because this thing is handled in the controller and from here model and view will face some changes.
+//
+///////////////////////////////////////
+// Lecture 9: Refactoring for MVC Architecture:
+// ok here it is very clear that we have two major files. One is controller and other is model. controller is for navigation and model is for business logics, STATE and HTTP requests. And there is a folder for multiple views in which each file is for each view.
+// in model there is one big object which contains the functionality of recipe, search and bookmarks. we export this object into controller and then this thing controls the UI in views.
+// The reason for this lecture is to divide the whole code in multiple stuff. The code which is written already and the code which will come afterward will be in this pattern.
+// summary: The thing is clear now how we breakdown our code into multiple files and then the chunks are performed in their respective files.
+// Recipe view has his own code and data is nowhere in recipeView file. Also we have made the loadRecipe async function which makes the fetch request and get the data from API.
+// Now this data is given to the recipe view in the controller( As both models and view are imported in the controller) and this data is given by the piece of code RecipeView.render(model.state.recipe) and here the data is replaced by the data coming from API. Happy😍
+///////////////////////////////////////
+// Lecture 11: Event Handler in MVC -> this thing is done by something called Publisher-subscriber pattern
+// hashchange is in the controller but everything related to DOM should be in view.
+// hashchange and load event together are not looking like they are in view but the event like click on the DOM appear that they are the part of view. same goes for hashchange and load event. They should appear in the view.
+// But the problem is that we want this function in the view but the function inside it is controlView which is the method of the controller. So how can we resolve it.
+// There are two important things to understand
+// (1): Events should be handled in the controller (otherwise we would have application logic in the view)
+// (2): Events should be listened for in the view (otherwise we would need DOM element in the controller)
+// Otherwise we would have DOM element in the controller and application logic in the view which would be wrong and against our MVC architecture.
+// we think that this thing is simple to handle that why should not call the controlRecipe function when the event occurs
+// But the thing is difficult is that we should not import controller in the view, because we set up the architecture like that the view should know nothing about the controller and it will work the other way around which is complex. The solution is called publisher-subscriber pattern. And design pattern in the programming are the standard solutions of specific kind of problem.
+// In this pattern, we have a publisher which have some code who knows when to react(like this is the event handler, a specific event occurs). And on the other hand there is subscriber which is the code which actually wants to react.(This is the code which will execute when the event fires)
+// And publisher does not even know that the subscriber does exist. because subscriber is in the controller and view does not have access of it. But now finally comes to the solution of the problem.
+// So, the solution is that we will now subscribe to the publisher by passing the subscribe. init function is in the controller. so the way is that as soon as the program loads init function is called which in turn immediately called the addHandlerRender function from the view. This thing is possible because the controller imports both view and the model. as we call the addHandleRender function in the init, we will pass the controlRecipe function as argument. So, essentially we will subscribe controlRecipes to addHandlerRender and in this way the two functions are really connected.
+const init = function() {
+    (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
+};
+init(); // By these two chunks of code we have perform the publisher-subscriber pattern.
  ///////////////////////////////////////
 
 },{"regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model.js":"Y4A21","./views/RecipeView.js":"aFEMw"}],"dXNgZ":[function(require,module,exports,__globalThis) {
@@ -1482,15 +1501,19 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 var _regeneratorRuntime = require("regenerator-runtime");
+var _configJs = require("./config.js");
+var _helpersJs = require("./helpers.js");
 const state = {
     recipe: {}
 };
 const loadRecipe = async function(id) {
     try {
-        const res = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`);
-        const data = await res.json();
-        if (!res.ok) throw new error(`${data.message} ${res.status}`);
-        console.log(res, data);
+        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}/${id}`);
+        // here getJSON function is called by the loadRecipe function. As this function call is the async call and the data over there is the resolved value of the promise so this value is again stored here to be used below.
+        // const res = await fetch(`${API_URL}/${id}`);
+        // const data = await res.json();
+        // if (!res.ok) throw new error(`${data.message} ${res.status}`);
+        // console.log(res, data);
         const { recipe } = data.data;
         console.log('recipe is', recipe);
         state.recipe = {
@@ -1504,13 +1527,59 @@ const loadRecipe = async function(id) {
             ingredients: recipe.ingredients
         };
     } catch (err) {
-        alert(err);
+        // Temporary error
+        console.error(`${err} \u{1F525}\u{1F525}\u{1F525}\u{1F525}`);
     }
 }; // loadRecipe is a function which is bringing the data of recipe from forkify APIs.
  // this function will not return anything but it will change our state object
  // This state is imported in the controller. As this state is changed over there. It will also be reflected in controller.js
+ // lecture 10 part -> this error is the consequence of the error which error occurs in the helper function
+ // The thing is that wwe do not want this error but we want the error which is in the helper function. So, this thing is set by rethrowing the error in the helper function
+ // So when we rethrow the error this error will come down the track in the console.error which is mentioned over there.
 
-},{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aFEMw":[function(require,module,exports,__globalThis) {
+},{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./config.js":"k5Hzs","./helpers.js":"hGI1E"}],"k5Hzs":[function(require,module,exports,__globalThis) {
+// Lecture 10:
+// here we add all the variables that should be constants and will be reused in our project.
+// we will not add all the variables but only that variables which are responsible for some kind of data manipulation. Like the API URL. As the API_URL is used at many places like getting the data and for uploading our own recipe. so let say this URL is changed in the future. So instead of changing the URL in all the places, we will change in this variable only.
+// we have used the upper-case and the reason is that this variable will not change in the future.
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "API_URL", ()=>API_URL);
+parcelHelpers.export(exports, "TIMEOUT_SEC", ()=>TIMEOUT_SEC);
+const API_URL = 'https://forkify-api.herokuapp.com/api/v2/recipes';
+const TIMEOUT_SEC = 10;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hGI1E":[function(require,module,exports,__globalThis) {
+// Lecture 10:
+//  This file will contain the functions which we will use over and over again in our project
+// like we are getting the JSON so many times from our fetch request, so this thing will be place in a function over here and will be use again and again
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getJSON", ()=>getJSON);
+var _configJs = require("./config.js");
+const timeout = function(s) {
+    return new Promise(function(_, reject) {
+        setTimeout(function() {
+            reject(new Error(`Request took too long! Timeout after ${s} second`));
+        }, s * 1000);
+    });
+};
+const getJSON = async function(url) {
+    try {
+        // const res = await fetch(url);
+        const res = await Promise.race([
+            fetch(url),
+            timeout((0, _configJs.TIMEOUT_SEC))
+        ]);
+        const data = await res.json();
+        if (!res.ok) throw new error(`${data.message} ${res.status}`);
+        return data;
+    } catch (err) {
+        throw err;
+    }
+}; // ok the thing is that if the data is not coming within 5 second then the timeout function will be the winner and in this function there is the error and this error will be thrown below and fetch request is no longer running.
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./config.js":"k5Hzs"}],"aFEMw":[function(require,module,exports,__globalThis) {
 // import icons from '../img/icons.svg'; // Parcel 1
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -1543,6 +1612,13 @@ class RecipeView {
         this.#parentElement.innerHTML = '';
         this.#parentElement.insertAdjacentHTML('afterbegin', markup);
     };
+    // Publisher code
+    addHandlerRender(handler) {
+        [
+            'hashchange',
+            'load'
+        ].forEach((ev)=>window.addEventListener(ev, handler));
+    }
     #generateMarkup() {
         return `
         <figure class="recipe__fig">
