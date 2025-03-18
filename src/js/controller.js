@@ -1,6 +1,7 @@
 import * as model from './model.js';
 import RecipeView from './views/RecipeView.js';
 import searchView from './views/searchView.js';
+import resultsView from './views/resultsView.js';
 // now here in model the state and loadRecipe will be used as model.state and model.loadRecipe
 
 // Lecture 3: Overview and planning
@@ -216,7 +217,6 @@ const controlRecipe = async function () {
     RecipeView.renderError();
   }
 };
-controlRecipe();
 // This fetch request will return a promise and this promise is awaited.
 
 ///////////////////////////////////////
@@ -335,6 +335,7 @@ controlRecipe();
 
 const controlSearchResults = async function () {
   try {
+    resultsView.renderSpinner();
     // 1: Get Search Query
     const query = searchView.getQuery();
     if (!query) return;
@@ -345,11 +346,11 @@ const controlSearchResults = async function () {
 
     // Render Search Result
     console.log(model.state.search.results);
+    resultsView.render(model.state.search.results);
   } catch (err) {
     console.log(err);
   }
 };
-controlSearchResults();
 
 // as this thing needs to happen in the search block by clicking the search button so we need to create its view, and this thing will be some other separate view which will not render anything but will provide us the set of input fields in the left side.
 // In first part of implementing search result, we have get the data and onclick of search button or hit enter we get the result of query and now we will implement the view.
