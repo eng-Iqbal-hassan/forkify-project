@@ -630,6 +630,7 @@ var _resultsViewJsDefault = parcelHelpers.interopDefault(_resultsViewJs);
 // import icons from 'url:../img/icons.svg'; // Parcel 2
 // import 'core-js/stable'; // this thing is for poly-filling everything else.
 var _runtime = require("regenerator-runtime/runtime"); //This thing is for poly-filling async await
+if (module.hot) module.hot.accept();
 const recipeContainer = document.querySelector('.recipe');
 // const timeout = function (s) {
 //   return new Promise(function (_, reject) {
@@ -902,7 +903,7 @@ const controlSearchResults = async function() {
         await _modelJs.loadSearchResults(query); // we are not storing it in the variable because it is not returning anything but it is manipulating the state.
         // after using this query there will be no data at the start and then we need to make the event which will listen on the click of search button and on the click of that button we will call the function and not at the beginning when the script loads. And for this thing, we will again use the publisher subscriber pattern
         // Render Search Result
-        console.log(_modelJs.state.search.results);
+        // console.log(model.state.search.results);
         (0, _resultsViewJsDefault.default).render(_modelJs.state.search.results);
     } catch (err) {
         console.log(err);
@@ -2068,6 +2069,7 @@ var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
     render(data) {
+        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
         this._data = data;
         const markup = this._generateMarkup();
         this._clear();
@@ -2189,6 +2191,8 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class ResultsView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector('.results ');
+    _errorMessage = 'No recipes found for your query. Please try Again! ';
+    _successMessage = '';
     _generateMarkup() {
         console.log(this._data); // This is the same data which we render in the controller.js
         return this._data.map(this._generateMarkupPreview).join('');
@@ -2198,7 +2202,7 @@ class ResultsView extends (0, _viewDefault.default) {
         <li class="preview">
             <a class="preview__link preview__link--active" href="#${result.id}">
               <figure class="preview__fig">
-                <img src="${result.image}" alt="${result.id}" />
+                <img src="${result.image}" alt="${result.title}" />
               </figure>
               <div class="preview__data">
                 <h4 class="preview__title">${result.title}</h4>

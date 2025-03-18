@@ -2,6 +2,10 @@ import * as model from './model.js';
 import RecipeView from './views/RecipeView.js';
 import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
+
+if (module.hot) {
+  module.hot.accept();
+}
 // now here in model the state and loadRecipe will be used as model.state and model.loadRecipe
 
 // Lecture 3: Overview and planning
@@ -345,7 +349,7 @@ const controlSearchResults = async function () {
     // after using this query there will be no data at the start and then we need to make the event which will listen on the click of search button and on the click of that button we will call the function and not at the beginning when the script loads. And for this thing, we will again use the publisher subscriber pattern
 
     // Render Search Result
-    console.log(model.state.search.results);
+    // console.log(model.state.search.results);
     resultsView.render(model.state.search.results);
   } catch (err) {
     console.log(err);
