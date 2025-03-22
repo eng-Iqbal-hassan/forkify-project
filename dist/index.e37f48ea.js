@@ -1016,7 +1016,8 @@ const loadSearchResults = async function(query) {
                 image: rec.image_url
             }; // This thing will return new array with new object and we will store this in our state and state should contain all the data about our application
         });
-    // console.log(state.search.results); This console is put in the controller now.
+        // console.log(state.search.results); This console is put in the controller now.
+        state.search.page = 1; // This thing will reset the page nack ton one when we made new search, so the new search data and pagination will start from page 1.
     } catch (err) {
         console.error(`${err} \u{1F525}\u{1F525}\u{1F525}\u{1F525}`);
         throw err;
