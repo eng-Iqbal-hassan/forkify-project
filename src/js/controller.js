@@ -2,6 +2,7 @@ import * as model from './model.js';
 import RecipeView from './views/RecipeView.js';
 import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
+import PaginationView from './views/PaginationView.js';
 
 if (module.hot) {
   module.hot.accept();
@@ -351,10 +352,21 @@ const controlSearchResults = async function () {
     // Render Search Result
     // console.log(model.state.search.results);
     // resultsView.render(model.state.search.results);
-    resultsView.render(model.getSearchResultsPage());
+    resultsView.render(model.getSearchResultsPage(1));
+
+    // Render the initial pagination buttons.
+    PaginationView.render(model.state.search);
   } catch (err) {
     console.log(err);
   }
+};
+
+const controlPagination = function (goToPage) {
+  // Render New Search Result
+  resultsView.render(model.getSearchResultsPage(goToPage));
+
+  // Render the New Pagination  pagination buttons.
+  PaginationView.render(model.state.search);
 };
 
 // as this thing needs to happen in the search block by clicking the search button so we need to create its view, and this thing will be some other separate view which will not render anything but will provide us the set of input fields in the left side.
@@ -365,5 +377,6 @@ const controlSearchResults = async function () {
 const init = function () {
   RecipeView.addHandlerRender(controlRecipe);
   searchView.addHandlerSearch(controlSearchResults);
+  PaginationView.addHandlerClick(controlPagination);
 };
 init();
