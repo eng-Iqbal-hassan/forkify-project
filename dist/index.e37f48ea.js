@@ -666,6 +666,12 @@ const controlRecipe = async function() {
         // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
         if (!id) return; // guard clause
         // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
+        // 0: Update result view to mark selected search result
+        (0, _resultsViewJsDefault.default).update(_modelJs.getSearchResultsPage());
+        // resultsView.render(model.getSearchResultsPage());
+        // we can do with render as well but it will re-render each time when we will click on any of the recipe so to avoid the multiple reload we have used update method.
+        // The best thing is that we have made the update method in parent view element and before we are looking into the recipeView. That the data inside the recipeView is changing.
+        // But as this method is in the parent element so each time when any of the recipe comes into the screen the only recipeView is updated and not re-render all the time. Great.
         // 1: Loading the recipe:
         (0, _recipeViewJsDefault.default).renderSpinner();
         /*
@@ -928,7 +934,9 @@ const controlServings = function(newServings) {
     // 1. Update the recipe servings (in state)
     _modelJs.updateServings(newServings);
     // 2. Update the recipe view
-    (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+    // RecipeView.render(model.state.recipe);
+    (0, _recipeViewJsDefault.default).update(_modelJs.state.recipe);
+// Now, we want that instead of render the completed DOM, we will update the text and attribute whose data is changing in servings. Now this update method will also need all the data which render method does have.
 };
 // Ok once again I have observed that how this complete model is working.
 // Here the model and view is building independently and both are coming in the controller. Here in the controller both are connected together to give the whole functionality.
@@ -2133,11 +2141,48 @@ var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
     render(data) {
-        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+        // if (!data || (Array.isArray(data) && data.length === 0))
+        //   return this.renderError();
         this._data = data;
         const markup = this._generateMarkup();
         this._clear();
         this._parentElement.insertAdjacentHTML('afterbegin', markup);
+    }
+    update(data) {
+        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+        this._data = data;
+        const newMarkup = this._generateMarkup();
+        // Here we generate the new markup and we will not render the complete markup but we will compare the new markup with the older one and will change the data and attribute only whose value is changing.
+        // Now this new markup is the string only and it is difficult to compare this string to the DOM element which is already existing in the screen.
+        // This thing is resolved by using the trick by which we will convert our string into DOM object.
+        const newDOM = document.createRange().createContextualFragment(newMarkup);
+        // For this thing we have applied createRange method which has created a range and on this range we have applied another method createContextualFragment and in this method we have passed a string and this method has created the real DOM node. This DOM node is virtual DOM node which is a big object, the node which really not exist in the page but exists in our memory
+        const newElement = Array.from(newDOM.querySelectorAll('*'));
+        // console.log(newElement);
+        const curElement = Array.from(this._parentElement.querySelectorAll('*'));
+        // console.log(curElement);
+        // Here we need to compare one by one each element in the array so we will loop over the complete newElement
+        newElement.forEach((newEl, i)=>{
+            const curEl = curElement[i];
+            // then how will we compare each element in the node. This thing is done by very healthy method which is isEqualNode
+            // console.log(curEl, newEl.isEqualNode(curEl)); // This thing has given us the true for the newEl which are same as the curEl and false for the those newEl which are not same as that of curEl.
+            // Update changed text
+            if (!newEl.isEqualNode(curEl) && newEl.firstChild?.nodeValue.trim() !== '') curEl.textContent = newEl.textContent;
+            // so here if newEl is not same as that of curEl then the text of current element will be changed with the text of new element. According to this property, the value of the most of the elements is null and if the element is text, then its value will content of the text node.
+            // so the if condition has been improved a bit and in it we are comparing the text in actual by nodeValue method
+            // Here newEl is the div like element and in front of it when i place firstChild then it reaches to the text inside of it and then we have applied nodeValue method to compare the text and then trim method is applied which will remove the empty spaces
+            // And in comparison of it we have given not equal to empty because in case of element(div) level nodeValue method will give us the null and we will not include it and this time our div structure will not be finished.
+            // till now we are getting 3 and 5 servings only, because till now we have changed the text only and we need to change the attribute also. and then the whole thing will be fixed.
+            // we can not update the attribute in the same above if block because the condition after and is for comparing text only.
+            // Update changed Attribute
+            if (!newEl.isEqualNode(curEl)) {
+                console.log(newEl.attributes);
+                Array.from(newEl.attributes).forEach((attr)=>curEl.setAttribute(attr.name, attr.value));
+            // By this thing wwe have taken the attribute from newEl and set it to the curEl.
+            // so by this thing we are able to go as far as we want to get the servings of the any number of persons
+            }
+        // so here attributes method return us the object which contains all the attributes that have changed. Now we convert object into array and can loop over the array and copy attribute from one element into the other elements.
+        });
     }
     _clear() {
         this._parentElement.innerHTML = '';
@@ -2262,9 +2307,12 @@ class ResultsView extends (0, _viewDefault.default) {
         return this._data.map(this._generateMarkupPreview).join('');
     }
     _generateMarkupPreview(result) {
+        // Here the thing which we further want to have is that the element whose id is same as that of selected id will be highlighted
+        const id = window.location.hash.slice(1);
+        // so in the above url we will hash and after the # symbol everything will be in this id variable.
         return `
         <li class="preview">
-            <a class="preview__link preview__link--active" href="#${result.id}">
+            <a class="preview__link ${result.id === id ? 'preview__link--active' : ''}" href="#${result.id}">
               <figure class="preview__fig">
                 <img src="${result.image}" alt="${result.title}" />
               </figure>

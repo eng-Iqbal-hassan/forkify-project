@@ -11,9 +11,14 @@ class ResultsView extends View {
     return this._data.map(this._generateMarkupPreview).join('');
   }
   _generateMarkupPreview(result) {
+    // Here the thing which we further want to have is that the element whose id is same as that of selected id will be highlighted
+    const id = window.location.hash.slice(1);
+    // so in the above url we will hash and after the # symbol everything will be in this id variable.
     return `
         <li class="preview">
-            <a class="preview__link preview__link--active" href="#${result.id}">
+            <a class="preview__link ${
+              result.id === id ? 'preview__link--active' : ''
+            }" href="#${result.id}">
               <figure class="preview__fig">
                 <img src="${result.image}" alt="${result.title}" />
               </figure>

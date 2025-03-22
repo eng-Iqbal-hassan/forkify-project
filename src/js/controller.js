@@ -79,6 +79,15 @@ const controlRecipe = async function () {
     // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
     if (!id) return; // guard clause
     // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
+
+    // 0: Update result view to mark selected search result
+
+    resultsView.update(model.getSearchResultsPage());
+
+    // resultsView.render(model.getSearchResultsPage());
+    // we can do with render as well but it will re-render each time when we will click on any of the recipe so to avoid the multiple reload we have used update method.
+    // The best thing is that we have made the update method in parent view element and before we are looking into the recipeView. That the data inside the recipeView is changing.
+    // But as this method is in the parent element so each time when any of the recipe comes into the screen the only recipeView is updated and not re-render all the time. Great.
     // 1: Loading the recipe:
     RecipeView.renderSpinner();
     /*
@@ -379,7 +388,9 @@ const controlServings = function (newServings) {
   // 1. Update the recipe servings (in state)
   model.updateServings(newServings);
   // 2. Update the recipe view
-  RecipeView.render(model.state.recipe);
+  // RecipeView.render(model.state.recipe);
+  RecipeView.update(model.state.recipe);
+  // Now, we want that instead of render the completed DOM, we will update the text and attribute whose data is changing in servings. Now this update method will also need all the data which render method does have.
 };
 
 // Ok once again I have observed that how this complete model is working.
