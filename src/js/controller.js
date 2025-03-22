@@ -356,6 +356,9 @@ const controlSearchResults = async function () {
 
     // Render the initial pagination buttons.
     PaginationView.render(model.state.search);
+
+    // Test
+    // controlServings(); // Now we have removed this test thing and we really want to change the servings on the click of the button.
   } catch (err) {
     console.log(err);
   }
@@ -372,11 +375,30 @@ const controlPagination = function (goToPage) {
 // as this thing needs to happen in the search block by clicking the search button so we need to create its view, and this thing will be some other separate view which will not render anything but will provide us the set of input fields in the left side.
 // In first part of implementing search result, we have get the data and onclick of search button or hit enter we get the result of query and now we will implement the view.
 
+const controlServings = function (newServings) {
+  // 1. Update the recipe servings (in state)
+  model.updateServings(newServings);
+  // 2. Update the recipe view
+  RecipeView.render(model.state.recipe);
+};
+
+// Ok once again I have observed that how this complete model is working.
+// Here the model and view is building independently and both are coming in the controller. Here in the controller both are connected together to give the whole functionality.
+// Like in model there is updateServing function which basically is the forEach method which change the ingredient quantity of each element of the array by the formula which we have given against the param newServing which will be given afterward.
+// In RecipeView, we have added a method in which we have put the onclick method on buttons by event delegation both things have come up in the controller. Both function and method of model and controlRecipe respectively have added in the controlServings function in the controller.
+
+// And finally method for updateServings which will get the servings argument which will be this controlServings function will be called in the init function. This is the little explanation of how MVC works.
+
+// Important Note: In control Servings there is RecipeView.render by which all time onClick of the button complete UI is updated and this thing generates the flickering effect atleast visible on the image that appears that all the time when the serving updates it is reloaded for small instance. Now our next target that instead of re-render the complete view, we will update the markup when the servings will be updated.
+
 ///////////////////////////////////////
 
 const init = function () {
   RecipeView.addHandlerRender(controlRecipe);
+  RecipeView.addHandlerUpdateServings(controlServings);
   searchView.addHandlerSearch(controlSearchResults);
   PaginationView.addHandlerClick(controlPagination);
+  // controlServings(); // This will not give us no recipe because the recipe is coming from async function and no recipe is reached so how it can change the recipe.
+  // so I am putting this recipe in the above load recipe function.
 };
 init();

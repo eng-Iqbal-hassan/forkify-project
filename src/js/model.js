@@ -87,3 +87,14 @@ export const getSearchResultsPage = function (page = state.search.page) {
   const end = page * state.search.resultsPerPage;
   return state.search.results.slice(start, end);
 };
+
+export const updateServings = function (newServings) {
+  // This function will do is to reach into the state and in particular into the recipe ingredients and will change the quantity in each ingredients.
+  state.recipe.ingredients.forEach(ing => {
+    ing.quantity = ing.quantity * (newServings / state.recipe.servings);
+    // We can calculate the new quantity by the formula
+    // newQt = oldQt * newServings / oldServings
+  });
+  state.recipe.servings = newServings; // So we have update the array and this manipulated array will be shown in the UI.
+  // There was small issue that I added the state.recipe.servings = newServings; inside forEach method which create the trouble that for only first ingredient the quantity was changing. now as per rule i have put it outside the whole servings start dynamically changing.
+};

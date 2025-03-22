@@ -910,6 +910,8 @@ const controlSearchResults = async function() {
         (0, _resultsViewJsDefault.default).render(_modelJs.getSearchResultsPage(1));
         // Render the initial pagination buttons.
         (0, _paginationViewJsDefault.default).render(_modelJs.state.search);
+    // Test
+    // controlServings(); // Now we have removed this test thing and we really want to change the servings on the click of the button.
     } catch (err) {
         console.log(err);
     }
@@ -922,11 +924,26 @@ const controlPagination = function(goToPage) {
 };
 // as this thing needs to happen in the search block by clicking the search button so we need to create its view, and this thing will be some other separate view which will not render anything but will provide us the set of input fields in the left side.
 // In first part of implementing search result, we have get the data and onclick of search button or hit enter we get the result of query and now we will implement the view.
+const controlServings = function(newServings) {
+    // 1. Update the recipe servings (in state)
+    _modelJs.updateServings(newServings);
+    // 2. Update the recipe view
+    (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+};
+// Ok once again I have observed that how this complete model is working.
+// Here the model and view is building independently and both are coming in the controller. Here in the controller both are connected together to give the whole functionality.
+// Like in model there is updateServing function which basically is the forEach method which change the ingredient quantity of each element of the array by the formula which we have given against the param newServing which will be given afterward.
+// In RecipeView, we have added a method in which we have put the onclick method on buttons by event delegation both things have come up in the controller. Both function and method of model and controlRecipe respectively have added in the controlServings function in the controller.
+// And finally method for updateServings which will get the servings argument which will be this controlServings function will be called in the init function. This is the little explanation of how MVC works.
+// Important Note: In control Servings there is RecipeView.render by which all time onClick of the button complete UI is updated and this thing generates the flickering effect atleast visible on the image that appears that all the time when the serving updates it is reloaded for small instance. Now our next target that instead of re-render the complete view, we will update the markup when the servings will be updated.
 ///////////////////////////////////////
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
+    (0, _recipeViewJsDefault.default).addHandlerUpdateServings(controlServings);
     (0, _searchViewJsDefault.default).addHandlerSearch(controlSearchResults);
     (0, _paginationViewJsDefault.default).addHandlerClick(controlPagination);
+// controlServings(); // This will not give us no recipe because the recipe is coming from async function and no recipe is reached so how it can change the recipe.
+// so I am putting this recipe in the above load recipe function.
 };
 init();
 
@@ -937,6 +954,7 @@ parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults);
 parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
+parcelHelpers.export(exports, "updateServings", ()=>updateServings);
 var _regeneratorRuntime = require("regenerator-runtime");
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
@@ -1001,6 +1019,16 @@ const getSearchResultsPage = function(page = state.search.page) {
     const start = (page - 1) * state.search.resultsPerPage;
     const end = page * state.search.resultsPerPage;
     return state.search.results.slice(start, end);
+};
+const updateServings = function(newServings) {
+    // This function will do is to reach into the state and in particular into the recipe ingredients and will change the quantity in each ingredients.
+    state.recipe.ingredients.forEach((ing)=>{
+        ing.quantity = ing.quantity * (newServings / state.recipe.servings);
+    // We can calculate the new quantity by the formula
+    // newQt = oldQt * newServings / oldServings
+    });
+    state.recipe.servings = newServings; // So we have update the array and this manipulated array will be shown in the UI.
+// There was small issue that I added the state.recipe.servings = newServings; inside forEach method which create the trouble that for only first ingredient the quantity was changing. now as per rule i have put it outside the whole servings start dynamically changing.
 };
 
 },{"regenerator-runtime":"dXNgZ","./config.js":"k5Hzs","./helpers.js":"hGI1E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dXNgZ":[function(require,module,exports,__globalThis) {
@@ -1734,6 +1762,22 @@ class RecipeView extends (0, _viewJsDefault.default) {
             'load'
         ].forEach((ev)=>window.addEventListener(ev, handler));
     }
+    addHandlerUpdateServings(handler) {
+        // we will do our working by event delegation -> which is the applying event on parent element and then by it we do our functionality on child element.
+        this._parentElement.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn--update-servings');
+            if (!btn) return;
+            console.log(btn);
+            // There is the place where will connect our UI with the code by which we will change the servings dynamically by clicking the button.
+            // The achievement is similar to the pagination button according to which we add the special data property to the servings button which in turn helps us to change the UI.
+            // const updateTo = btn.dataset.updateTo;
+            // Here the syntax is because when we have the dash notation for data in the HTML then it will change into the camel case notation.
+            // To make the code even more cleaner we have change the above syntax into the destructuring
+            const { updateTo } = btn.dataset; // and this updateTo value will keep changing on clicking the button.
+            if (+updateTo > 0) handler(+updateTo); // This + sign has changed the string into the number
+        // so the handler will take the value and will pass it down the track in the controller by which the UI will be updated for the ingredients
+        });
+    }
     _generateMarkup() {
         return `
         <figure class="recipe__fig">
@@ -1759,12 +1803,12 @@ class RecipeView extends (0, _viewJsDefault.default) {
             <span class="recipe__info-text">servings</span>
 
             <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${this._data.servings - 1}">
                 <svg>
                   <use href="${0, _iconsSvgDefault.default}#icon-minus-circle"></use>
                 </svg>
               </button>
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${this._data.servings + 1}">
                 <svg>
                   <use href="${0, _iconsSvgDefault.default}#icon-plus-circle"></use>
                 </svg>

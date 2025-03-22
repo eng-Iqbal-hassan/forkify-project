@@ -70,6 +70,24 @@ class RecipeView extends View {
     ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
   }
 
+  addHandlerUpdateServings(handler) {
+    // we will do our working by event delegation -> which is the applying event on parent element and then by it we do our functionality on child element.
+    this._parentElement.addEventListener('click', function (e) {
+      const btn = e.target.closest('.btn--update-servings');
+      if (!btn) return;
+      console.log(btn);
+      // There is the place where will connect our UI with the code by which we will change the servings dynamically by clicking the button.
+      // The achievement is similar to the pagination button according to which we add the special data property to the servings button which in turn helps us to change the UI.
+      // const updateTo = btn.dataset.updateTo;
+
+      // Here the syntax is because when we have the dash notation for data in the HTML then it will change into the camel case notation.
+      // To make the code even more cleaner we have change the above syntax into the destructuring
+      const { updateTo } = btn.dataset; // and this updateTo value will keep changing on clicking the button.
+      if (+updateTo > 0) handler(+updateTo); // This + sign has changed the string into the number
+      // so the handler will take the value and will pass it down the track in the controller by which the UI will be updated for the ingredients
+    });
+  }
+
   _generateMarkup() {
     return `
         <figure class="recipe__fig">
@@ -101,12 +119,16 @@ class RecipeView extends View {
             <span class="recipe__info-text">servings</span>
 
             <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${
+                this._data.servings - 1
+              }">
                 <svg>
                   <use href="${icons}#icon-minus-circle"></use>
                 </svg>
               </button>
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${
+                this._data.servings + 1
+              }">
                 <svg>
                   <use href="${icons}#icon-plus-circle"></use>
                 </svg>
