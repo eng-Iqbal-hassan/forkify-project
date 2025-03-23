@@ -1,6 +1,6 @@
 import { async } from 'regenerator-runtime';
-import { API_URL, RES_PER_PAGE } from './config.js';
-import { getJSON } from './helpers.js';
+import { API_URL, RES_PER_PAGE, KEY } from './config.js';
+import { getJSON, sendJSON } from './helpers.js';
 
 export const state = {
   recipe: {},
@@ -13,6 +13,23 @@ export const state = {
   bookMarks: [],
 };
 
+const createRecipeObject = function (data) {
+  const { recipe } = data.data;
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    publisher: recipe.publisher,
+    sourceUrl: recipe.source_url,
+    image: recipe.image_url,
+    servings: recipe.servings,
+    cookingTime: recipe.cooking_time,
+    ingredients: recipe.ingredients,
+    ...(recipe.key && { key: recipe.key }),
+    // Not all the time recipe does have the key, like the case of loadRecipe data with get request. But in post request the recipe key is important thing. so we have conditionally get the key by short-circuiting(if first value is true then the second value is returned and now the object is returned which using the spread operator will be the same as that of key value pair)
+    // This is nice trick sometime to set the property conditionally on an object.
+  };
+};
+
 export const loadRecipe = async function (id) {
   try {
     const data = await getJSON(`${API_URL}${id}`);
@@ -22,18 +39,19 @@ export const loadRecipe = async function (id) {
     // if (!res.ok) throw new error(`${data.message} ${res.status}`);
 
     // console.log(res, data);
-    const { recipe } = data.data;
+    // const { recipe } = data.data;
     console.log('recipe is', recipe);
-    state.recipe = {
-      id: recipe.id,
-      title: recipe.title,
-      publisher: recipe.publisher,
-      sourceUrl: recipe.source_url,
-      image: recipe.image_url,
-      servings: recipe.servings,
-      cookingTime: recipe.cooking_time,
-      ingredients: recipe.ingredients,
-    };
+    // state.recipe = {
+    //   id: recipe.id,
+    //   title: recipe.title,
+    //   publisher: recipe.publisher,
+    //   sourceUrl: recipe.source_url,
+    //   image: recipe.image_url,
+    //   servings: recipe.servings,
+    //   cookingTime: recipe.cooking_time,
+    //   ingredients: recipe.ingredients,
+    // };
+    state.recipe = createRecipeObject(data);
 
     // Here the recipe is loaded from the API and not from any of the data which is already in bookmarked. Ok so we have bookmarked one of the recipe and then move into the next recipe when comes back to the previous recipe then the icon which indicates it to be bookmarked has reset back to un-bookmarked.
 
@@ -157,3 +175,48 @@ const clearBookmarks = function () {
 };
 
 // clearBookmarks(); // at sometime of our project we might need to clear the whole bookmark so this function will work over there.
+
+export const uploadRecipe = async function (newRecipe) {
+  try {
+    // This is the model which is responsible for sending data to forkify API.
+    // The next thing which we need to make sure that our raw data should be in the same format as that of the data coming from API.
+    console.log(Object.entries(newRecipe));
+    // Here we are focused that we will get the ingredient in the format of data coming from API.
+    const ingredients = Object.entries(newRecipe)
+      .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
+      .map(ing => {
+        ingArr = ing[1].replaceAll(' ', '').split(',');
+        if (ingArr.length !== 3)
+          throw new Error(
+            'Wrong ingredient format! Please use the correct format;)'
+          );
+        const [quantity, unit, description] = ingArr;
+        return { quantity: quantity ? +quantity : null, unit, description };
+      });
+    console.log(ingredients); // here the ingredient format is same as that of ingredient from API (Array of object, each object is key value pair separated by commas)
+    // Here the quantity is set like if quantity does exist then it is a number and if does not exist then it is null -> same as that in API.
+
+    // Now we need to create the object which need to pass to the API.
+    const recipe = {
+      title: newRecipe.title,
+      source_url: newRecipe.sourceUrl,
+      image_url: newRecipe.image,
+      publisher: newRecipe.publisher,
+      cooking_time: +newRecipe.cookingTime,
+      servings: +newRecipe.servings,
+      ingredients,
+    }; // Now this object is opposite to the recipe object which we have up.
+    // cooking time and servings are the numbers so we have converted them into numbers by + trick
+    console.log(recipe); // Here the object is looking exactly same and ready to be send to the API.
+
+    // post request
+    const data = await sendJSON(`${API_URL}?key=${KEY}`, recipe);
+    console.log(data);
+    // Now we want to store this newly created data by the post request in the state
+    state.recipe = createRecipeObject(data); // now by this thing the data will be in the state
+    // also we need to bookmark this recipe, so this thing is done by calling the bookmark function over there
+    addBookMark(state.recipe);
+  } catch (err) {
+    throw err;
+  }
+};

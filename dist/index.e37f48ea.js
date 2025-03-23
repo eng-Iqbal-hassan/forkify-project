@@ -598,6 +598,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 },{}],"aenu9":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _modelJs = require("./model.js");
+var _configJs = require("./config.js");
 var _recipeViewJs = require("./views/RecipeView.js");
 var _recipeViewJsDefault = parcelHelpers.interopDefault(_recipeViewJs);
 var _searchViewJs = require("./views/searchView.js");
@@ -963,9 +964,24 @@ const controlAddBookmark = function() {
 const controlBookmarks = function() {
     (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookMarks);
 };
-const controlAddRecipe = function(newRecipe) {
-    console.log(newRecipe);
-// Upload new Recipe data
+const controlAddRecipe = async function(newRecipe) {
+    // console.log(newRecipe);
+    try {
+        // Show loading spinner
+        (0, _addRecipeViewJsDefault.default).renderSpinner();
+        // Upload new Recipe data
+        await _modelJs.uploadRecipe(newRecipe);
+        // Render the recipe in the view.
+        (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+        // SUCCESS message
+        (0, _addRecipeViewJsDefault.default).renderMessage();
+        // close the modal window
+        setTimeout(function() {
+            (0, _addRecipeViewJsDefault.default).toggleWindow();
+        }, (0, _configJs.MODAL_CLOSE_SEC) * 1000);
+    } catch (err) {
+        (0, _addRecipeViewJsDefault.default).renderError(err.message);
+    }
 };
 ///////////////////////////////////////
 const init = function() {
@@ -981,7 +997,7 @@ const init = function() {
 };
 init();
 
-},{"./model.js":"Y4A21","./views/RecipeView.js":"aFEMw","./views/searchView.js":"9OQAM","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./views/resultsView.js":"cSbZE","./views/PaginationView.js":"9Uw3J","./views/bookmarksView.js":"4Lqzq","./views/addRecipeView.js":"i6DNj"}],"Y4A21":[function(require,module,exports,__globalThis) {
+},{"./model.js":"Y4A21","./views/RecipeView.js":"aFEMw","./views/searchView.js":"9OQAM","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./views/resultsView.js":"cSbZE","./views/PaginationView.js":"9Uw3J","./views/bookmarksView.js":"4Lqzq","./views/addRecipeView.js":"i6DNj","./config.js":"k5Hzs"}],"Y4A21":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state);
@@ -991,6 +1007,7 @@ parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
 parcelHelpers.export(exports, "updateServings", ()=>updateServings);
 parcelHelpers.export(exports, "addBookMark", ()=>addBookMark);
 parcelHelpers.export(exports, "deleteBookmark", ()=>deleteBookmark);
+parcelHelpers.export(exports, "uploadRecipe", ()=>uploadRecipe);
 var _regeneratorRuntime = require("regenerator-runtime");
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
@@ -1004,6 +1021,22 @@ const state = {
     },
     bookMarks: []
 };
+const createRecipeObject = function(data) {
+    const { recipe: recipe1 } = data.data;
+    return {
+        id: recipe1.id,
+        title: recipe1.title,
+        publisher: recipe1.publisher,
+        sourceUrl: recipe1.source_url,
+        image: recipe1.image_url,
+        servings: recipe1.servings,
+        cookingTime: recipe1.cooking_time,
+        ingredients: recipe1.ingredients,
+        ...recipe1.key && {
+            key: recipe1.key
+        }
+    };
+};
 const loadRecipe = async function(id) {
     try {
         const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}${id}`);
@@ -1012,18 +1045,19 @@ const loadRecipe = async function(id) {
         // const data = await res.json();
         // if (!res.ok) throw new error(`${data.message} ${res.status}`);
         // console.log(res, data);
-        const { recipe } = data.data;
+        // const { recipe } = data.data;
         console.log('recipe is', recipe);
-        state.recipe = {
-            id: recipe.id,
-            title: recipe.title,
-            publisher: recipe.publisher,
-            sourceUrl: recipe.source_url,
-            image: recipe.image_url,
-            servings: recipe.servings,
-            cookingTime: recipe.cooking_time,
-            ingredients: recipe.ingredients
-        };
+        // state.recipe = {
+        //   id: recipe.id,
+        //   title: recipe.title,
+        //   publisher: recipe.publisher,
+        //   sourceUrl: recipe.source_url,
+        //   image: recipe.image_url,
+        //   servings: recipe.servings,
+        //   cookingTime: recipe.cooking_time,
+        //   ingredients: recipe.ingredients,
+        // };
+        state.recipe = createRecipeObject(data);
         // Here the recipe is loaded from the API and not from any of the data which is already in bookmarked. Ok so we have bookmarked one of the recipe and then move into the next recipe when comes back to the previous recipe then the icon which indicates it to be bookmarked has reset back to un-bookmarked.
         // this thing is resolved by another array method, which is some method and according to this method -> it loop over the array and return true if any of the value is true otherwise it returns false
         if (state.bookMarks.some((bookmark)=>bookmark.id === id)) state.recipe.bookMarked = true;
@@ -1075,12 +1109,12 @@ const updateServings = function(newServings) {
 const persistBookmarks = function() {
     localStorage.setItem('bookmarks', JSON.stringify(state.bookMarks));
 };
-const addBookMark = function(recipe) {
+const addBookMark = function(recipe1) {
     // bookMarks is all about storing the data about the recipe which we want to have. so for bookmarks we have initially the empty array of bookmarks then this array will keep changing when user add or remove a specific recipe as a bookmarked recipe.
     // add the bookmark;
-    state.bookMarks.push(recipe); // In this array, simply we will add the recipe object which will be received.
+    state.bookMarks.push(recipe1); // In this array, simply we will add the recipe object which will be received.
     // Mark current recipe as bookmarked recipe.
-    if (recipe.id === state.recipe.id) state.recipe.bookMarked = true;
+    if (recipe1.id === state.recipe.id) state.recipe.bookMarked = true;
     persistBookmarks();
 };
 const deleteBookmark = function(id) {
@@ -1102,7 +1136,48 @@ const init = function() {
 init();
 const clearBookmarks = function() {
     localStorage.clear('bookmarks');
-}; // clearBookmarks(); // at sometime of our project we might need to clear the whole bookmark so this function will work over there.
+};
+const uploadRecipe = async function(newRecipe) {
+    try {
+        // This is the model which is responsible for sending data to forkify API.
+        // The next thing which we need to make sure that our raw data should be in the same format as that of the data coming from API.
+        console.log(Object.entries(newRecipe));
+        // Here we are focused that we will get the ingredient in the format of data coming from API.
+        const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith('ingredient') && entry[1] !== '').map((ing)=>{
+            ingArr = ing[1].replaceAll(' ', '').split(',');
+            if (ingArr.length !== 3) throw new Error('Wrong ingredient format! Please use the correct format;)');
+            const [quantity, unit, description] = ingArr;
+            return {
+                quantity: quantity ? +quantity : null,
+                unit,
+                description
+            };
+        });
+        console.log(ingredients); // here the ingredient format is same as that of ingredient from API (Array of object, each object is key value pair separated by commas)
+        // Here the quantity is set like if quantity does exist then it is a number and if does not exist then it is null -> same as that in API.
+        // Now we need to create the object which need to pass to the API.
+        const recipe1 = {
+            title: newRecipe.title,
+            source_url: newRecipe.sourceUrl,
+            image_url: newRecipe.image,
+            publisher: newRecipe.publisher,
+            cooking_time: +newRecipe.cookingTime,
+            servings: +newRecipe.servings,
+            ingredients
+        }; // Now this object is opposite to the recipe object which we have up.
+        // cooking time and servings are the numbers so we have converted them into numbers by + trick
+        console.log(recipe1); // Here the object is looking exactly same and ready to be send to the API.
+        // post request
+        const data = await (0, _helpersJs.sendJSON)(`${(0, _configJs.API_URL)}?key=${(0, _configJs.KEY)}`, recipe1);
+        console.log(data);
+        // Now we want to store this newly created data by the post request in the state
+        state.recipe = createRecipeObject(data); // now by this thing the data will be in the state
+        // also we need to bookmark this recipe, so this thing is done by calling the bookmark function over there
+        addBookMark(state.recipe);
+    } catch (err) {
+        throw err;
+    }
+};
 
 },{"regenerator-runtime":"dXNgZ","./config.js":"k5Hzs","./helpers.js":"hGI1E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dXNgZ":[function(require,module,exports,__globalThis) {
 /**
@@ -1699,9 +1774,13 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "API_URL", ()=>API_URL);
 parcelHelpers.export(exports, "TIMEOUT_SEC", ()=>TIMEOUT_SEC);
 parcelHelpers.export(exports, "RES_PER_PAGE", ()=>RES_PER_PAGE);
+parcelHelpers.export(exports, "KEY", ()=>KEY);
+parcelHelpers.export(exports, "MODAL_CLOSE_SEC", ()=>MODAL_CLOSE_SEC);
 const API_URL = 'https://forkify-api.herokuapp.com/api/v2/recipes/';
 const TIMEOUT_SEC = 10;
 const RES_PER_PAGE = 10;
+const KEY = 'd7cb61d0-2c90-4e9e-b5c5-28f5f21852b3';
+const MODAL_CLOSE_SEC = 2;
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports,__globalThis) {
 exports.interopDefault = function(a) {
@@ -1740,6 +1819,7 @@ exports.export = function(dest, destName, get) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "getJSON", ()=>getJSON);
+parcelHelpers.export(exports, "sendJSON", ()=>sendJSON);
 var _configJs = require("./config.js");
 const timeout = function(s) {
     return new Promise(function(_, reject) {
@@ -1751,8 +1831,9 @@ const timeout = function(s) {
 const getJSON = async function(url) {
     try {
         // const res = await fetch(url);
+        const fetchPro = fetch(url);
         const res = await Promise.race([
-            fetch(url),
+            fetchPro,
             timeout((0, _configJs.TIMEOUT_SEC))
         ]);
         const data = await res.json();
@@ -1761,7 +1842,28 @@ const getJSON = async function(url) {
     } catch (err) {
         throw err;
     }
-}; // ok the thing is that if the data is not coming within 5 second then the timeout function will be the winner and in this function there is the error and this error will be thrown below and fetch request is no longer running.
+};
+const sendJSON = async function(url, uploadData) {
+    try {
+        // const res = await fetch(url);
+        const fetchPro = fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(uploadData)
+        });
+        const res = await Promise.race([
+            fetchPro,
+            timeout((0, _configJs.TIMEOUT_SEC))
+        ]);
+        const data = await res.json();
+        if (!res.ok) throw new error(`${data.message} ${res.status}`);
+        return data;
+    } catch (err) {
+        throw err;
+    }
+};
 
 },{"./config.js":"k5Hzs","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aFEMw":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -2514,6 +2616,7 @@ var _view = require("./view");
 var _viewDefault = parcelHelpers.interopDefault(_view);
 class addRecipeView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector('.upload');
+    _message = 'Recipe is successfully uploaded.';
     _window = document.querySelector('.add-recipe-window');
     _overlay = document.querySelector('.overlay');
     _btnOpen = document.querySelector('.nav__btn--add-recipe');

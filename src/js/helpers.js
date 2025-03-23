@@ -19,7 +19,8 @@ const timeout = function (s) {
 export const getJSON = async function (url) {
   try {
     // const res = await fetch(url);
-    const res = await Promise.race([fetch(url), timeout(TIMEOUT_SEC)]);
+    const fetchPro = fetch(url);
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
     const data = await res.json();
     if (!res.ok) throw new error(`${data.message} ${res.status}`);
     return data;
@@ -28,3 +29,26 @@ export const getJSON = async function (url) {
   }
 };
 // ok the thing is that if the data is not coming within 5 second then the timeout function will be the winner and in this function there is the error and this error will be thrown below and fetch request is no longer running.
+
+// Up till this point simply with the fetch request, we pass the url then it automatically make the get request for getting the data from API.
+// But when we have to pass the data to the API then we have to make the post request.
+// so in post request, we have to pass some more value along with API url. there is one object in which we tell about the method which is post method and an header in which additional information is shared, the most important is Content-Type, by which we tell the API we are giving the data in json format, only then API allow us to send data to it. And in the last in the body data is send which is accepted as second parameter of the function. and everything next is same as that in get request
+
+export const sendJSON = async function (url, uploadData) {
+  try {
+    // const res = await fetch(url);
+    const fetchPro = fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(uploadData), //This is also called the payload of the request.
+    });
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+    const data = await res.json();
+    if (!res.ok) throw new error(`${data.message} ${res.status}`);
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};

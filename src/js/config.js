@@ -6,3 +6,5 @@
 export const API_URL = 'https://forkify-api.herokuapp.com/api/v2/recipes/';
 export const TIMEOUT_SEC = 10;
 export const RES_PER_PAGE = 10;
+export const KEY = 'd7cb61d0-2c90-4e9e-b5c5-28f5f21852b3';
+export const MODAL_CLOSE_SEC = 2;
