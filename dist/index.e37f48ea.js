@@ -974,10 +974,14 @@ const controlAddRecipe = async function(newRecipe) {
         // Render the recipe in the view.
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
         // SUCCESS message
-        (0, _addRecipeViewJsDefault.default).renderMessage();
+        // addRecipeView.renderMessage();
         // Render bookmark view
         (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookMarks);
         // Change id in the url
+        // it has been observed that id of the upcoming recipe is not changed and this thing is done by history API of the browser and then on this history object we can call the push state method. This method allow us to change the url without reload the page. This method takes in the three arguments, first argument is the state which does not really matter and we set it to null, and second one is the title which is set to empty as well and the third one is the url which is important
+        window.history.pushState(null, '', `${_modelJs.state.recipe.id}`);
+        // we can do so many things by this history API -> like going back to the previous page
+        // window.history.back() not required in our case.
         // close the modal window
         setTimeout(function() {
             (0, _addRecipeViewJsDefault.default).toggleWindow();
@@ -1042,7 +1046,7 @@ const createRecipeObject = function(data) {
 };
 const loadRecipe = async function(id) {
     try {
-        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}${id}`);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}${id}`);
         // here getJSON function is called by the loadRecipe function. As this function call is the async call and the data over there is the resolved value of the promise so this value is again stored here to be used below.
         // const res = await fetch(`${API_URL}/${id}`);
         // const data = await res.json();
@@ -1074,7 +1078,7 @@ const loadRecipe = async function(id) {
 const loadSearchResults = async function(query) {
     try {
         state.search.query = query;
-        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}?search=${query}`);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}?search=${query}`);
         console.log(data);
         // we have made the new object which will contain the entries of our need.
         state.search.results = data.data.recipes.map((rec)=>{
@@ -1171,7 +1175,7 @@ const uploadRecipe = async function(newRecipe) {
         // cooking time and servings are the numbers so we have converted them into numbers by + trick
         console.log(recipe); // Here the object is looking exactly same and ready to be send to the API.
         // post request
-        const data = await (0, _helpersJs.sendJSON)(`${(0, _configJs.API_URL)}?key=${(0, _configJs.KEY)}`, recipe);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}?key=${(0, _configJs.KEY)}`, recipe);
         console.log(data);
         // Now we want to store this newly created data by the post request in the state
         state.recipe = createRecipeObject(data); // now by this thing the data will be in the state
@@ -1821,8 +1825,7 @@ exports.export = function(dest, destName, get) {
 // like we are getting the JSON so many times from our fetch request, so this thing will be place in a function over here and will be use again and again
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "getJSON", ()=>getJSON);
-parcelHelpers.export(exports, "sendJSON", ()=>sendJSON);
+parcelHelpers.export(exports, "AJAX", ()=>AJAX);
 var _configJs = require("./config.js");
 const timeout = function(s) {
     return new Promise(function(_, reject) {
@@ -1831,31 +1834,16 @@ const timeout = function(s) {
         }, s * 1000);
     });
 };
-const getJSON = async function(url) {
+const AJAX = async function(url, uploadData) {
     try {
         // const res = await fetch(url);
-        const fetchPro = fetch(url);
-        const res = await Promise.race([
-            fetchPro,
-            timeout((0, _configJs.TIMEOUT_SEC))
-        ]);
-        const data = await res.json();
-        if (!res.ok) throw new error(`${data.message} ${res.status}`);
-        return data;
-    } catch (err) {
-        throw err;
-    }
-};
-const sendJSON = async function(url, uploadData) {
-    try {
-        // const res = await fetch(url);
-        const fetchPro = fetch(url, {
+        const fetchPro = uploadData ? fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(uploadData)
-        });
+        }) : fetch(url);
         const res = await Promise.race([
             fetchPro,
             timeout((0, _configJs.TIMEOUT_SEC))
@@ -1866,7 +1854,40 @@ const sendJSON = async function(url, uploadData) {
     } catch (err) {
         throw err;
     }
-};
+}; // export const getJSON = async function (url) {
+ //   try {
+ //     // const res = await fetch(url);
+ //     const fetchPro = fetch(url);
+ //     const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+ //     const data = await res.json();
+ //     if (!res.ok) throw new error(`${data.message} ${res.status}`);
+ //     return data;
+ //   } catch (err) {
+ //     throw err;
+ //   }
+ // };
+ // ok the thing is that if the data is not coming within 5 second then the timeout function will be the winner and in this function there is the error and this error will be thrown below and fetch request is no longer running.
+ // Up till this point simply with the fetch request, we pass the url then it automatically make the get request for getting the data from API.
+ // But when we have to pass the data to the API then we have to make the post request.
+ // so in post request, we have to pass some more value along with API url. there is one object in which we tell about the method which is post method and an header in which additional information is shared, the most important is Content-Type, by which we tell the API we are giving the data in json format, only then API allow us to send data to it. And in the last in the body data is send which is accepted as second parameter of the function. and everything next is same as that in get request
+ // export const sendJSON = async function (url, uploadData) {
+ //   try {
+ //     // const res = await fetch(url);
+ //     const fetchPro = fetch(url, {
+ //       method: 'POST',
+ //       headers: {
+ //         'Content-Type': 'application/json',
+ //       },
+ //       body: JSON.stringify(uploadData), //This is also called the payload of the request.
+ //     });
+ //     const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+ //     const data = await res.json();
+ //     if (!res.ok) throw new error(`${data.message} ${res.status}`);
+ //     return data;
+ //   } catch (err) {
+ //     throw err;
+ //   }
+ // };
 
 },{"./config.js":"k5Hzs","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aFEMw":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");

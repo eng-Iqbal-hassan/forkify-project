@@ -1,6 +1,6 @@
 import { async } from 'regenerator-runtime';
 import { API_URL, RES_PER_PAGE, KEY } from './config.js';
-import { getJSON, sendJSON } from './helpers.js';
+import { AJAX } from './helpers.js';
 
 export const state = {
   recipe: {},
@@ -32,7 +32,7 @@ const createRecipeObject = function (data) {
 
 export const loadRecipe = async function (id) {
   try {
-    const data = await getJSON(`${API_URL}${id}`);
+    const data = await AJAX(`${API_URL}${id}`);
     // here getJSON function is called by the loadRecipe function. As this function call is the async call and the data over there is the resolved value of the promise so this value is again stored here to be used below.
     // const res = await fetch(`${API_URL}/${id}`);
     // const data = await res.json();
@@ -81,7 +81,7 @@ export const loadSearchResults = async function (query) {
   try {
     state.search.query = query;
 
-    const data = await getJSON(`${API_URL}?search=${query}`);
+    const data = await AJAX(`${API_URL}?search=${query}`);
     console.log(data);
     // we have made the new object which will contain the entries of our need.
     state.search.results = data.data.recipes.map(rec => {
@@ -210,7 +210,7 @@ export const uploadRecipe = async function (newRecipe) {
     console.log(recipe); // Here the object is looking exactly same and ready to be send to the API.
 
     // post request
-    const data = await sendJSON(`${API_URL}?key=${KEY}`, recipe);
+    const data = await AJAX(`${API_URL}?key=${KEY}`, recipe);
     console.log(data);
     // Now we want to store this newly created data by the post request in the state
     state.recipe = createRecipeObject(data); // now by this thing the data will be in the state

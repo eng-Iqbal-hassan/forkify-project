@@ -440,12 +440,17 @@ const controlAddRecipe = async function (newRecipe) {
     RecipeView.render(model.state.recipe);
 
     // SUCCESS message
-    addRecipeView.renderMessage();
+    // addRecipeView.renderMessage();
 
     // Render bookmark view
     bookmarksView.render(model.state.bookMarks);
 
     // Change id in the url
+    // it has been observed that id of the upcoming recipe is not changed and this thing is done by history API of the browser and then on this history object we can call the push state method. This method allow us to change the url without reload the page. This method takes in the three arguments, first argument is the state which does not really matter and we set it to null, and second one is the title which is set to empty as well and the third one is the url which is important
+    window.history.pushState(null, '', `${model.state.recipe.id}`);
+
+    // we can do so many things by this history API -> like going back to the previous page
+    // window.history.back() not required in our case.
 
     // close the modal window
     setTimeout(function () {
