@@ -1,5 +1,6 @@
 import View from './view';
 import icons from 'url:../../img/icons.svg';
+import previewView from './previewView';
 
 class ResultsView extends View {
   _parentElement = document.querySelector('.results');
@@ -7,33 +8,38 @@ class ResultsView extends View {
   _successMessage = '';
 
   _generateMarkup() {
-    console.log(this._data); // This is the same data which we render in the controller.js
-    return this._data.map(this._generateMarkupPreview).join('');
+    console.log(this._data);
+    return this._data.map(result => previewView.render(result, false)).join('');
   }
-  _generateMarkupPreview(result) {
-    // Here the thing which we further want to have is that the element whose id is same as that of selected id will be highlighted
-    const id = window.location.hash.slice(1);
-    // so in the above url we will hash and after the # symbol everything will be in this id variable.
-    return `
-        <li class="preview">
-            <a class="preview__link ${
-              result.id === id ? 'preview__link--active' : ''
-            }" href="#${result.id}">
-              <figure class="preview__fig">
-                <img src="${result.image}" alt="${result.title}" />
-              </figure>
-              <div class="preview__data">
-                <h4 class="preview__title">${result.title}</h4>
-                <p class="preview__publisher">${result.publisher} </p>
-                <div class="preview__user-generated">
-                  <svg>
-                    <use href="${icons}#icon-user"></use>
-                  </svg>
-                </div>
-              </div>
-            </a>
-        </li>
-    `;
-  }
+
+  // _generateMarkup() {
+  //   console.log(this._data); // This is the same data which we render in the controller.js
+  //   return this._data.map(this._generateMarkupPreview).join('');
+  // }
+  // _generateMarkupPreview(result) {
+  //   // Here the thing which we further want to have is that the element whose id is same as that of selected id will be highlighted
+  //   const id = window.location.hash.slice(1);
+  //   // so in the above url we will hash and after the # symbol everything will be in this id variable.
+  //   return `
+  //       <li class="preview">
+  //           <a class="preview__link ${
+  //             result.id === id ? 'preview__link--active' : ''
+  //           }" href="#${result.id}">
+  //             <figure class="preview__fig">
+  //               <img src="${result.image}" alt="${result.title}" />
+  //             </figure>
+  //             <div class="preview__data">
+  //               <h4 class="preview__title">${result.title}</h4>
+  //               <p class="preview__publisher">${result.publisher} </p>
+  //               <div class="preview__user-generated">
+  //                 <svg>
+  //                   <use href="${icons}#icon-user"></use>
+  //                 </svg>
+  //               </div>
+  //             </div>
+  //           </a>
+  //       </li>
+  //   `;
+  // }
 }
 export default new ResultsView();

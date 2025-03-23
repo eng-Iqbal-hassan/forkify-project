@@ -3,6 +3,7 @@ import RecipeView from './views/RecipeView.js';
 import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
 import PaginationView from './views/PaginationView.js';
+import bookmarksView from './views/bookmarksView.js';
 
 if (module.hot) {
   module.hot.accept();
@@ -81,8 +82,10 @@ const controlRecipe = async function () {
     // the code at the bottom which is hashchange(for lecture 6) gives us the id whose recipe should be shown. so we get the id from page url and then the respective id is used to show the page.
 
     // 0: Update result view to mark selected search result
+    // Update bookmarkView to mark selected search result
 
     resultsView.update(model.getSearchResultsPage());
+    bookmarksView.update(model.state.bookMarks);
 
     // resultsView.render(model.getSearchResultsPage());
     // we can do with render as well but it will re-render each time when we will click on any of the recipe so to avoid the multiple reload we have used update method.
@@ -403,13 +406,19 @@ const controlServings = function (newServings) {
 // Important Note: In control Servings there is RecipeView.render by which all time onClick of the button complete UI is updated and this thing generates the flickering effect atleast visible on the image that appears that all the time when the serving updates it is reloaded for small instance. Now our next target that instead of re-render the complete view, we will update the markup when the servings will be updated.
 
 const controlAddBookmark = function () {
+  // 1. Add/Remove bookmark.
   if (!model.state.recipe.bookMarked) {
     model.addBookMark(model.state.recipe);
   } else {
     model.deleteBookmark(model.state.recipe.id);
   }
-  console.log(model.state.recipe);
+  // console.log(model.state.recipe);
+
+  // 2. Update Recipe View
   RecipeView.update(model.state.recipe);
+
+  // 3. Render bookmarks
+  bookmarksView.render(model.state.bookMarks);
 };
 
 ///////////////////////////////////////
