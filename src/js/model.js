@@ -39,7 +39,7 @@ export const loadRecipe = async function (id) {
     // if (!res.ok) throw new error(`${data.message} ${res.status}`);
 
     // console.log(res, data);
-    // const { recipe } = data.data;
+    const { recipe } = data.data;
     console.log('recipe is', recipe);
     // state.recipe = {
     //   id: recipe.id,

@@ -975,6 +975,9 @@ const controlAddRecipe = async function(newRecipe) {
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
         // SUCCESS message
         (0, _addRecipeViewJsDefault.default).renderMessage();
+        // Render bookmark view
+        (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookMarks);
+        // Change id in the url
         // close the modal window
         setTimeout(function() {
             (0, _addRecipeViewJsDefault.default).toggleWindow();
@@ -1022,18 +1025,18 @@ const state = {
     bookMarks: []
 };
 const createRecipeObject = function(data) {
-    const { recipe: recipe1 } = data.data;
+    const { recipe } = data.data;
     return {
-        id: recipe1.id,
-        title: recipe1.title,
-        publisher: recipe1.publisher,
-        sourceUrl: recipe1.source_url,
-        image: recipe1.image_url,
-        servings: recipe1.servings,
-        cookingTime: recipe1.cooking_time,
-        ingredients: recipe1.ingredients,
-        ...recipe1.key && {
-            key: recipe1.key
+        id: recipe.id,
+        title: recipe.title,
+        publisher: recipe.publisher,
+        sourceUrl: recipe.source_url,
+        image: recipe.image_url,
+        servings: recipe.servings,
+        cookingTime: recipe.cooking_time,
+        ingredients: recipe.ingredients,
+        ...recipe.key && {
+            key: recipe.key
         }
     };
 };
@@ -1045,7 +1048,7 @@ const loadRecipe = async function(id) {
         // const data = await res.json();
         // if (!res.ok) throw new error(`${data.message} ${res.status}`);
         // console.log(res, data);
-        // const { recipe } = data.data;
+        const { recipe } = data.data;
         console.log('recipe is', recipe);
         // state.recipe = {
         //   id: recipe.id,
@@ -1109,12 +1112,12 @@ const updateServings = function(newServings) {
 const persistBookmarks = function() {
     localStorage.setItem('bookmarks', JSON.stringify(state.bookMarks));
 };
-const addBookMark = function(recipe1) {
+const addBookMark = function(recipe) {
     // bookMarks is all about storing the data about the recipe which we want to have. so for bookmarks we have initially the empty array of bookmarks then this array will keep changing when user add or remove a specific recipe as a bookmarked recipe.
     // add the bookmark;
-    state.bookMarks.push(recipe1); // In this array, simply we will add the recipe object which will be received.
+    state.bookMarks.push(recipe); // In this array, simply we will add the recipe object which will be received.
     // Mark current recipe as bookmarked recipe.
-    if (recipe1.id === state.recipe.id) state.recipe.bookMarked = true;
+    if (recipe.id === state.recipe.id) state.recipe.bookMarked = true;
     persistBookmarks();
 };
 const deleteBookmark = function(id) {
@@ -1156,7 +1159,7 @@ const uploadRecipe = async function(newRecipe) {
         console.log(ingredients); // here the ingredient format is same as that of ingredient from API (Array of object, each object is key value pair separated by commas)
         // Here the quantity is set like if quantity does exist then it is a number and if does not exist then it is null -> same as that in API.
         // Now we need to create the object which need to pass to the API.
-        const recipe1 = {
+        const recipe = {
             title: newRecipe.title,
             source_url: newRecipe.sourceUrl,
             image_url: newRecipe.image,
@@ -1166,9 +1169,9 @@ const uploadRecipe = async function(newRecipe) {
             ingredients
         }; // Now this object is opposite to the recipe object which we have up.
         // cooking time and servings are the numbers so we have converted them into numbers by + trick
-        console.log(recipe1); // Here the object is looking exactly same and ready to be send to the API.
+        console.log(recipe); // Here the object is looking exactly same and ready to be send to the API.
         // post request
-        const data = await (0, _helpersJs.sendJSON)(`${(0, _configJs.API_URL)}?key=${(0, _configJs.KEY)}`, recipe1);
+        const data = await (0, _helpersJs.sendJSON)(`${(0, _configJs.API_URL)}?key=${(0, _configJs.KEY)}`, recipe);
         console.log(data);
         // Now we want to store this newly created data by the post request in the state
         state.recipe = createRecipeObject(data); // now by this thing the data will be in the state

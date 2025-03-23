@@ -442,6 +442,11 @@ const controlAddRecipe = async function (newRecipe) {
     // SUCCESS message
     addRecipeView.renderMessage();
 
+    // Render bookmark view
+    bookmarksView.render(model.state.bookMarks);
+
+    // Change id in the url
+
     // close the modal window
     setTimeout(function () {
       addRecipeView.toggleWindow();
