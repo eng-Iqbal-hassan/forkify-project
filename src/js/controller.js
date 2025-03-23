@@ -402,11 +402,22 @@ const controlServings = function (newServings) {
 
 // Important Note: In control Servings there is RecipeView.render by which all time onClick of the button complete UI is updated and this thing generates the flickering effect atleast visible on the image that appears that all the time when the serving updates it is reloaded for small instance. Now our next target that instead of re-render the complete view, we will update the markup when the servings will be updated.
 
+const controlAddBookmark = function () {
+  if (!model.state.recipe.bookMarked) {
+    model.addBookMark(model.state.recipe);
+  } else {
+    model.deleteBookmark(model.state.recipe.id);
+  }
+  console.log(model.state.recipe);
+  RecipeView.update(model.state.recipe);
+};
+
 ///////////////////////////////////////
 
 const init = function () {
   RecipeView.addHandlerRender(controlRecipe);
   RecipeView.addHandlerUpdateServings(controlServings);
+  RecipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandlerSearch(controlSearchResults);
   PaginationView.addHandlerClick(controlPagination);
   // controlServings(); // This will not give us no recipe because the recipe is coming from async function and no recipe is reached so how it can change the recipe.

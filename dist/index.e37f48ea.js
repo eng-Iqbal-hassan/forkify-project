@@ -944,10 +944,17 @@ const controlServings = function(newServings) {
 // In RecipeView, we have added a method in which we have put the onclick method on buttons by event delegation both things have come up in the controller. Both function and method of model and controlRecipe respectively have added in the controlServings function in the controller.
 // And finally method for updateServings which will get the servings argument which will be this controlServings function will be called in the init function. This is the little explanation of how MVC works.
 // Important Note: In control Servings there is RecipeView.render by which all time onClick of the button complete UI is updated and this thing generates the flickering effect atleast visible on the image that appears that all the time when the serving updates it is reloaded for small instance. Now our next target that instead of re-render the complete view, we will update the markup when the servings will be updated.
+const controlAddBookmark = function() {
+    if (!_modelJs.state.recipe.bookMarked) _modelJs.addBookMark(_modelJs.state.recipe);
+    else _modelJs.deleteBookmark(_modelJs.state.recipe.id);
+    console.log(_modelJs.state.recipe);
+    (0, _recipeViewJsDefault.default).update(_modelJs.state.recipe);
+};
 ///////////////////////////////////////
 const init = function() {
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
     (0, _recipeViewJsDefault.default).addHandlerUpdateServings(controlServings);
+    (0, _recipeViewJsDefault.default).addHandlerAddBookmark(controlAddBookmark);
     (0, _searchViewJsDefault.default).addHandlerSearch(controlSearchResults);
     (0, _paginationViewJsDefault.default).addHandlerClick(controlPagination);
 // controlServings(); // This will not give us no recipe because the recipe is coming from async function and no recipe is reached so how it can change the recipe.
@@ -963,6 +970,8 @@ parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults);
 parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage);
 parcelHelpers.export(exports, "updateServings", ()=>updateServings);
+parcelHelpers.export(exports, "addBookMark", ()=>addBookMark);
+parcelHelpers.export(exports, "deleteBookmark", ()=>deleteBookmark);
 var _regeneratorRuntime = require("regenerator-runtime");
 var _configJs = require("./config.js");
 var _helpersJs = require("./helpers.js");
@@ -973,7 +982,8 @@ const state = {
         results: [],
         page: 1,
         resultsPerPage: (0, _configJs.RES_PER_PAGE)
-    }
+    },
+    bookMarks: []
 };
 const loadRecipe = async function(id) {
     try {
@@ -995,6 +1005,10 @@ const loadRecipe = async function(id) {
             cookingTime: recipe.cooking_time,
             ingredients: recipe.ingredients
         };
+        // Here the recipe is loaded from the API and not from any of the data which is already in bookmarked. Ok so we have bookmarked one of the recipe and then move into the next recipe when comes back to the previous recipe then the icon which indicates it to be bookmarked has reset back to un-bookmarked.
+        // this thing is resolved by another array method, which is some method and according to this method -> it loop over the array and return true if any of the value is true otherwise it returns false
+        if (state.bookMarks.some((bookmark)=>bookmark.id === id)) state.recipe.bookMarked = true;
+        else state.recipe.bookMarked = false;
     } catch (err) {
         // Temporary error
         console.error(`${err} \u{1F525}\u{1F525}\u{1F525}\u{1F525}`);
@@ -1039,6 +1053,20 @@ const updateServings = function(newServings) {
     state.recipe.servings = newServings; // So we have update the array and this manipulated array will be shown in the UI.
 // There was small issue that I added the state.recipe.servings = newServings; inside forEach method which create the trouble that for only first ingredient the quantity was changing. now as per rule i have put it outside the whole servings start dynamically changing.
 };
+const addBookMark = function(recipe) {
+    // bookMarks is all about storing the data about the recipe which we want to have. so for bookmarks we have initially the empty array of bookmarks then this array will keep changing when user add or remove a specific recipe as a bookmarked recipe.
+    // add the bookmark;
+    state.bookMarks.push(recipe); // In this array, simply we will add the recipe object which will be received.
+    // Mark current recipe as bookmarked recipe.
+    if (recipe.id === state.recipe.id) state.recipe.bookMarked = true;
+};
+const deleteBookmark = function(id) {
+    // Remove the bookmark
+    const index = state.bookMarks.findIndex((el)=>el.id === id);
+    state.bookMarks.splice(index, 1);
+    // Mark current recipe as NOT  bookmarked recipe.
+    if (id === state.recipe.id) state.recipe.bookMarked = false;
+}; // This is the common pattern in the programming that when we add something then we need the completed data and when we have to remove something then we need only id.
 
 },{"regenerator-runtime":"dXNgZ","./config.js":"k5Hzs","./helpers.js":"hGI1E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dXNgZ":[function(require,module,exports,__globalThis) {
 /**
@@ -1787,6 +1815,13 @@ class RecipeView extends (0, _viewJsDefault.default) {
         // so the handler will take the value and will pass it down the track in the controller by which the UI will be updated for the ingredients
         });
     }
+    addHandlerAddBookmark(handler) {
+        this._parentElement.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn--bookmark');
+            if (!btn) return;
+            handler();
+        });
+    }
     _generateMarkup() {
         return `
         <figure class="recipe__fig">
@@ -1830,9 +1865,9 @@ class RecipeView extends (0, _viewJsDefault.default) {
               <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
             </svg>
           </div>
-          <button class="btn--round">
+          <button class="btn--round btn--bookmark">
             <svg class="">
-              <use href="${0, _iconsSvgDefault.default}#icon-bookmark-fill"></use>
+              <use href="${0, _iconsSvgDefault.default}#icon-bookmark${this._data.bookMarked ? '-fill' : ''}"></use>
             </svg>
           </button>
         </div>

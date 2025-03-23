@@ -10,6 +10,7 @@ export const state = {
     page: 1,
     resultsPerPage: RES_PER_PAGE,
   },
+  bookMarks: [],
 };
 
 export const loadRecipe = async function (id) {
@@ -33,6 +34,16 @@ export const loadRecipe = async function (id) {
       cookingTime: recipe.cooking_time,
       ingredients: recipe.ingredients,
     };
+
+    // Here the recipe is loaded from the API and not from any of the data which is already in bookmarked. Ok so we have bookmarked one of the recipe and then move into the next recipe when comes back to the previous recipe then the icon which indicates it to be bookmarked has reset back to un-bookmarked.
+
+    // this thing is resolved by another array method, which is some method and according to this method -> it loop over the array and return true if any of the value is true otherwise it returns false
+
+    if (state.bookMarks.some(bookmark => bookmark.id === id)) {
+      state.recipe.bookMarked = true;
+    } else {
+      state.recipe.bookMarked = false;
+    }
   } catch (err) {
     // Temporary error
     console.error(`${err} 🔥🔥🔥🔥`);
@@ -62,6 +73,7 @@ export const loadSearchResults = async function (query) {
         publisher: rec.publisher,
         sourceUrl: rec.source_url,
         image: rec.image_url,
+        // bookMarked: false,
       }; // This thing will return new array with new object and we will store this in our state and state should contain all the data about our application
     });
     // console.log(state.search.results); This console is put in the controller now.
@@ -99,3 +111,24 @@ export const updateServings = function (newServings) {
   state.recipe.servings = newServings; // So we have update the array and this manipulated array will be shown in the UI.
   // There was small issue that I added the state.recipe.servings = newServings; inside forEach method which create the trouble that for only first ingredient the quantity was changing. now as per rule i have put it outside the whole servings start dynamically changing.
 };
+
+export const addBookMark = function (recipe) {
+  // bookMarks is all about storing the data about the recipe which we want to have. so for bookmarks we have initially the empty array of bookmarks then this array will keep changing when user add or remove a specific recipe as a bookmarked recipe.
+
+  // add the bookmark;
+  state.bookMarks.push(recipe); // In this array, simply we will add the recipe object which will be received.
+
+  // Mark current recipe as bookmarked recipe.
+  if (recipe.id === state.recipe.id) state.recipe.bookMarked = true;
+};
+
+export const deleteBookmark = function (id) {
+  // Remove the bookmark
+  const index = state.bookMarks.findIndex(el => el.id === id);
+  state.bookMarks.splice(index, 1);
+
+  // Mark current recipe as NOT  bookmarked recipe.
+  if (id === state.recipe.id) state.recipe.bookMarked = false;
+};
+
+// This is the common pattern in the programming that when we add something then we need the completed data and when we have to remove something then we need only id.
