@@ -112,6 +112,10 @@ export const updateServings = function (newServings) {
   // There was small issue that I added the state.recipe.servings = newServings; inside forEach method which create the trouble that for only first ingredient the quantity was changing. now as per rule i have put it outside the whole servings start dynamically changing.
 };
 
+const persistBookmarks = function () {
+  localStorage.setItem('bookmarks', JSON.stringify(state.bookMarks));
+};
+
 export const addBookMark = function (recipe) {
   // bookMarks is all about storing the data about the recipe which we want to have. so for bookmarks we have initially the empty array of bookmarks then this array will keep changing when user add or remove a specific recipe as a bookmarked recipe.
 
@@ -120,6 +124,7 @@ export const addBookMark = function (recipe) {
 
   // Mark current recipe as bookmarked recipe.
   if (recipe.id === state.recipe.id) state.recipe.bookMarked = true;
+  persistBookmarks();
 };
 
 export const deleteBookmark = function (id) {
@@ -132,3 +137,23 @@ export const deleteBookmark = function (id) {
 };
 
 // This is the common pattern in the programming that when we add something then we need the completed data and when we have to remove something then we need only id.
+
+// Ok the thing which we are going to fix next is that the data in the bookmark is gone when the page is loaded. So, the solution of this thing is that we will store the bookmark data in the local storage so even the page is loaded we will get our data of bookmark from local storage and our data will not lost
+
+// storing data in local storage is all about data so we will implement this thing here in the model
+
+// So when the user will bookmark or un-bookmark a recipe, thee array will be stored in the local storage.
+
+// on page load i want this localstorage data to come into the page
+
+const init = function () {
+  const storage = localStorage.getItem('bookmarks');
+  if (storage) state.bookMarks = JSON.parse(storage);
+};
+init();
+
+const clearBookmarks = function () {
+  localStorage.clear('bookmarks');
+};
+
+// clearBookmarks(); // at sometime of our project we might need to clear the whole bookmark so this function will work over there.

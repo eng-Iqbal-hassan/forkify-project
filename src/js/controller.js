@@ -421,9 +421,14 @@ const controlAddBookmark = function () {
   bookmarksView.render(model.state.bookMarks);
 };
 
+const controlBookmarks = function () {
+  bookmarksView.render(model.state.bookMarks);
+};
+
 ///////////////////////////////////////
 
 const init = function () {
+  bookmarksView.addHandlerRender(controlBookmarks);
   RecipeView.addHandlerRender(controlRecipe);
   RecipeView.addHandlerUpdateServings(controlServings);
   RecipeView.addHandlerAddBookmark(controlAddBookmark);

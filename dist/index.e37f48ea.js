@@ -958,8 +958,12 @@ const controlAddBookmark = function() {
     // 3. Render bookmarks
     (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookMarks);
 };
+const controlBookmarks = function() {
+    (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookMarks);
+};
 ///////////////////////////////////////
 const init = function() {
+    (0, _bookmarksViewJsDefault.default).addHandlerRender(controlBookmarks);
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipe);
     (0, _recipeViewJsDefault.default).addHandlerUpdateServings(controlServings);
     (0, _recipeViewJsDefault.default).addHandlerAddBookmark(controlAddBookmark);
@@ -1061,12 +1065,16 @@ const updateServings = function(newServings) {
     state.recipe.servings = newServings; // So we have update the array and this manipulated array will be shown in the UI.
 // There was small issue that I added the state.recipe.servings = newServings; inside forEach method which create the trouble that for only first ingredient the quantity was changing. now as per rule i have put it outside the whole servings start dynamically changing.
 };
+const persistBookmarks = function() {
+    localStorage.setItem('bookmarks', JSON.stringify(state.bookMarks));
+};
 const addBookMark = function(recipe) {
     // bookMarks is all about storing the data about the recipe which we want to have. so for bookmarks we have initially the empty array of bookmarks then this array will keep changing when user add or remove a specific recipe as a bookmarked recipe.
     // add the bookmark;
     state.bookMarks.push(recipe); // In this array, simply we will add the recipe object which will be received.
     // Mark current recipe as bookmarked recipe.
     if (recipe.id === state.recipe.id) state.recipe.bookMarked = true;
+    persistBookmarks();
 };
 const deleteBookmark = function(id) {
     // Remove the bookmark
@@ -1074,7 +1082,20 @@ const deleteBookmark = function(id) {
     state.bookMarks.splice(index, 1);
     // Mark current recipe as NOT  bookmarked recipe.
     if (id === state.recipe.id) state.recipe.bookMarked = false;
-}; // This is the common pattern in the programming that when we add something then we need the completed data and when we have to remove something then we need only id.
+};
+// This is the common pattern in the programming that when we add something then we need the completed data and when we have to remove something then we need only id.
+// Ok the thing which we are going to fix next is that the data in the bookmark is gone when the page is loaded. So, the solution of this thing is that we will store the bookmark data in the local storage so even the page is loaded we will get our data of bookmark from local storage and our data will not lost
+// storing data in local storage is all about data so we will implement this thing here in the model
+// So when the user will bookmark or un-bookmark a recipe, thee array will be stored in the local storage.
+// on page load i want this localstorage data to come into the page
+const init = function() {
+    const storage = localStorage.getItem('bookmarks');
+    if (storage) state.bookMarks = JSON.parse(storage);
+};
+init();
+const clearBookmarks = function() {
+    localStorage.clear('bookmarks');
+}; // clearBookmarks(); // at sometime of our project we might need to clear the whole bookmark so this function will work over there.
 
 },{"regenerator-runtime":"dXNgZ","./config.js":"k5Hzs","./helpers.js":"hGI1E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dXNgZ":[function(require,module,exports,__globalThis) {
 /**
@@ -2469,6 +2490,9 @@ class bookmarksView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector('.bookmarks__list ');
     _errorMessage = 'No bookmarks yet. Find a nice recipe and bookmark it ;)';
     _successMessage = '';
+    addHandlerRender(handler) {
+        window.addEventListener('load', handler);
+    }
     _generateMarkup() {
         console.log(this._data);
         return this._data.map((bookmark)=>(0, _previewViewDefault.default).render(bookmark, false)).join('');
