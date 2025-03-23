@@ -4,6 +4,7 @@ import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
 import PaginationView from './views/PaginationView.js';
 import bookmarksView from './views/bookmarksView.js';
+import addRecipeView from './views/addRecipeView.js';
 
 if (module.hot) {
   module.hot.accept();
@@ -425,6 +426,12 @@ const controlBookmarks = function () {
   bookmarksView.render(model.state.bookMarks);
 };
 
+const controlAddRecipe = function (newRecipe) {
+  console.log(newRecipe);
+
+  // Upload new Recipe data
+};
+
 ///////////////////////////////////////
 
 const init = function () {
@@ -434,6 +441,7 @@ const init = function () {
   RecipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandlerSearch(controlSearchResults);
   PaginationView.addHandlerClick(controlPagination);
+  addRecipeView.addHandlerUpload(controlAddRecipe);
   // controlServings(); // This will not give us no recipe because the recipe is coming from async function and no recipe is reached so how it can change the recipe.
   // so I am putting this recipe in the above load recipe function.
 };
