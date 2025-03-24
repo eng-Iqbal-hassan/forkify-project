@@ -972,14 +972,14 @@ const controlAddRecipe = async function(newRecipe) {
         // Upload new Recipe data
         await _modelJs.uploadRecipe(newRecipe);
         // Render the recipe in the view.
-        (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
+        (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe); // We have render the bookmark because we actually want to add one more entry in the bookmark, rather just updating the bookmark.
         // SUCCESS message
         // addRecipeView.renderMessage();
         // Render bookmark view
         (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookMarks);
         // Change id in the url
         // it has been observed that id of the upcoming recipe is not changed and this thing is done by history API of the browser and then on this history object we can call the push state method. This method allow us to change the url without reload the page. This method takes in the three arguments, first argument is the state which does not really matter and we set it to null, and second one is the title which is set to empty as well and the third one is the url which is important
-        window.history.pushState(null, '', `${_modelJs.state.recipe.id}`);
+        window.history.pushState(null, '', `# ${_modelJs.state.recipe.id}`);
         // we can do so many things by this history API -> like going back to the previous page
         // window.history.back() not required in our case.
         // close the modal window
@@ -1046,7 +1046,7 @@ const createRecipeObject = function(data) {
 };
 const loadRecipe = async function(id) {
     try {
-        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}${id}`);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}${id}?key=${(0, _configJs.KEY)}`);
         // here getJSON function is called by the loadRecipe function. As this function call is the async call and the data over there is the resolved value of the promise so this value is again stored here to be used below.
         // const res = await fetch(`${API_URL}/${id}`);
         // const data = await res.json();
@@ -1078,7 +1078,7 @@ const loadRecipe = async function(id) {
 const loadSearchResults = async function(query) {
     try {
         state.search.query = query;
-        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}?search=${query}`);
+        const data = await (0, _helpersJs.AJAX)(`${(0, _configJs.API_URL)}?search=${query}&key=${(0, _configJs.KEY)}`);
         console.log(data);
         // we have made the new object which will contain the entries of our need.
         state.search.results = data.data.recipes.map((rec)=>{
@@ -1087,7 +1087,10 @@ const loadSearchResults = async function(query) {
                 title: rec.title,
                 publisher: rec.publisher,
                 sourceUrl: rec.source_url,
-                image: rec.image_url
+                image: rec.image_url,
+                ...rec.key && {
+                    key: rec.key
+                }
             }; // This thing will return new array with new object and we will store this in our state and state should contain all the data about our application
         });
         // console.log(state.search.results); This console is put in the controller now.
@@ -1151,7 +1154,8 @@ const uploadRecipe = async function(newRecipe) {
         console.log(Object.entries(newRecipe));
         // Here we are focused that we will get the ingredient in the format of data coming from API.
         const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith('ingredient') && entry[1] !== '').map((ing)=>{
-            ingArr = ing[1].replaceAll(' ', '').split(',');
+            ingArr = ing[1].split(',').map((el)=>el.trim());
+            // ingArr = ing[1].replaceAll(' ', '').split(','); // it has been observed that here i wrote the tomato sauce then space between it also has removed so the thing is resolved by using trim which has removed extra spaces which are not needed.
             if (ingArr.length !== 3) throw new Error('Wrong ingredient format! Please use the correct format;)');
             const [quantity, unit, description] = ingArr;
             return {
@@ -1180,6 +1184,7 @@ const uploadRecipe = async function(newRecipe) {
         // Now we want to store this newly created data by the post request in the state
         state.recipe = createRecipeObject(data); // now by this thing the data will be in the state
         // also we need to bookmark this recipe, so this thing is done by calling the bookmark function over there
+        // we have added the key with other api requests. By it, when we search with any of the name, then if own recipe name contains the same word then our recipe also display in the search results.
         addBookMark(state.recipe);
     } catch (err) {
         throw err;
@@ -2022,7 +2027,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
             </div>
           </div>
 
-          <div class="recipe__user-generated">
+          <div class="recipe__user-generated ${this._data.key ? '' : 'hidden'}">
             <svg>
               <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
             </svg>
@@ -2530,7 +2535,7 @@ class previewView extends (0, _viewDefault.default) {
               <div class="preview__data">
                 <h4 class="preview__title">${this._data.title}</h4>
                 <p class="preview__publisher">${this._data.publisher} </p>
-                <div class="preview__user-generated">
+                <div class="preview__user-generated ${this._data.key ? '' : 'hidden'}">
                   <svg>
                     <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
                   </svg>

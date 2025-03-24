@@ -32,7 +32,7 @@ const createRecipeObject = function (data) {
 
 export const loadRecipe = async function (id) {
   try {
-    const data = await AJAX(`${API_URL}${id}`);
+    const data = await AJAX(`${API_URL}${id}?key=${KEY}`);
     // here getJSON function is called by the loadRecipe function. As this function call is the async call and the data over there is the resolved value of the promise so this value is again stored here to be used below.
     // const res = await fetch(`${API_URL}/${id}`);
     // const data = await res.json();
@@ -81,7 +81,7 @@ export const loadSearchResults = async function (query) {
   try {
     state.search.query = query;
 
-    const data = await AJAX(`${API_URL}?search=${query}`);
+    const data = await AJAX(`${API_URL}?search=${query}&key=${KEY}`);
     console.log(data);
     // we have made the new object which will contain the entries of our need.
     state.search.results = data.data.recipes.map(rec => {
@@ -91,6 +91,7 @@ export const loadSearchResults = async function (query) {
         publisher: rec.publisher,
         sourceUrl: rec.source_url,
         image: rec.image_url,
+        ...(rec.key && { key: rec.key }),
         // bookMarked: false,
       }; // This thing will return new array with new object and we will store this in our state and state should contain all the data about our application
     });
@@ -185,7 +186,8 @@ export const uploadRecipe = async function (newRecipe) {
     const ingredients = Object.entries(newRecipe)
       .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
       .map(ing => {
-        ingArr = ing[1].replaceAll(' ', '').split(',');
+        ingArr = ing[1].split(',').map(el => el.trim());
+        // ingArr = ing[1].replaceAll(' ', '').split(','); // it has been observed that here i wrote the tomato sauce then space between it also has removed so the thing is resolved by using trim which has removed extra spaces which are not needed.
         if (ingArr.length !== 3)
           throw new Error(
             'Wrong ingredient format! Please use the correct format;)'
@@ -215,6 +217,7 @@ export const uploadRecipe = async function (newRecipe) {
     // Now we want to store this newly created data by the post request in the state
     state.recipe = createRecipeObject(data); // now by this thing the data will be in the state
     // also we need to bookmark this recipe, so this thing is done by calling the bookmark function over there
+    // we have added the key with other api requests. By it, when we search with any of the name, then if own recipe name contains the same word then our recipe also display in the search results.
     addBookMark(state.recipe);
   } catch (err) {
     throw err;
